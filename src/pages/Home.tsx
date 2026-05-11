@@ -2,41 +2,30 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import styled from 'styled-components';
 import { useSelection } from '../contexts/SelectionContext';
 import { GalleryGrid } from '../components/GalleryGrid';
-import { SearchBar } from '../components/SearchBar';
-import { SortOptions } from '../components/SortOptions';
 import { SelectionControls } from '../components/SelectionControls';
+import { Navigation } from '../components/Layout/Navigation';
 import { filterPets, sortPets } from '../utils/filterAndSort';
 import { downloadSelectedImages } from '../utils/download';
+import { colors, typography, spacing, borderRadius } from '../theme';
+import { type FilterState } from '../components/FilterModal';
 import type { SortOption } from '../types/pet';
 
-const Container = styled.div`
-  min-height: 100vh;
-  background: #f5f5f5;
-`;
+// Remove the old Container, Header, and other styled components as they're now handled by Navigation
 
-const Header = styled.header`
-  background: white;
-  padding: 20px 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
-  @media (min-width: 768px) {
-    padding: 20px 32px;
-  }
-  
-  @media (min-width: 1024px) {
-    padding: 20px 40px;
-  }
-`;
 
-const HeaderContent = styled.div`
+
+
+
+const PageHeader = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: ${spacing.md};
+  margin-bottom: ${spacing.lg};
   
   @media (min-width: 768px) {
     flex-direction: row;
+    align-items: flex-end;
     justify-content: space-between;
-    align-items: center;
   }
 `;
 
@@ -47,30 +36,53 @@ const TitleSection = styled.div`
 `;
 
 const Title = styled.h1`
-  margin: 0;
-  font-size: 28px;
-  color: #333;
-  
-  @media (min-width: 768px) {
-    font-size: 32px;
-  }
+  font-size: ${typography.display.fontSize};
+  font-weight: ${typography.display.fontWeight};
+  font-family: ${typography.display.fontFamily};
+  color: ${colors.primary};
+  line-height: ${typography.display.lineHeight};
+  letter-spacing: ${typography.display.letterSpacing};
 `;
 
-const Controls = styled.div`
+const Subtitle = styled.p`
+  font-size: ${typography.body.large.fontSize};
+  font-weight: ${typography.body.large.fontWeight};
+  font-family: ${typography.body.large.fontFamily};
+  color: ${colors.onSurfaceVariant};
+  line-height: ${typography.body.large.lineHeight};
+  max-width: 672px;
+`;
+
+const SortContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  
-  @media (min-width: 768px) {
-    flex-direction: row;
-    align-items: center;
-    gap: 24px;
-  }
+  align-items: center;
+  gap: ${spacing.sm};
 `;
 
+const SortLabel = styled.span`
+  font-size: ${typography.label.medium.fontSize};
+  font-weight: ${typography.label.medium.fontWeight};
+  font-family: ${typography.label.medium.fontFamily};
+  color: ${colors.outline};
+`;
 
-
-
+const SortSelect = styled.select`
+  background: ${colors.surfaceContainer};
+  border: 1px solid ${colors.outlineVariant};
+  border-radius: ${borderRadius.lg};
+  padding: 8px 16px;
+  font-size: ${typography.label.medium.fontSize};
+  font-family: ${typography.label.medium.fontFamily};
+  color: ${colors.onSurface};
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  
+  &:focus {
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 2px ${colors.primary}40;
+  }
+`;
 
 const LoadMoreTrigger = styled.div`
   height: 20px;
@@ -84,7 +96,7 @@ const LoadingSpinner = styled.div`
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #3498db;
+  border-top: 4px solid ${colors.primary};
   border-radius: 50%;
   animation: spin 1s linear infinite;
   
@@ -96,19 +108,39 @@ const LoadingSpinner = styled.div`
 
 const Home: React.FC = () => {
   const { pets, loading, error, refetch, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, selectAll, clearSelection } = useSelection();
-  const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('name-asc');
   const [isDownloading, setIsDownloading] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(12);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    petType: [],
+    dateRange: 'all',
+    hasSelection: false,
+  });
   const PETS_PER_PAGE = 12;
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const filteredAndSortedPets = useMemo(() => {
-    const filtered = filterPets(pets, searchTerm);
+    let filtered = filterPets(pets, '');
+
+    // Apply additional filters
+    if (filters.petType.length > 0) {
+      filtered = filtered.filter(pet =>
+        filters.petType.some(type =>
+          pet.title.toLowerCase().includes(type.toLowerCase())
+        )
+      );
+    }
+
+    if (filters.hasSelection) {
+      filtered = filtered.filter(pet => selectedIds.has(pet.id));
+    }
+
+    // TODO: Implement date range filtering based on filters.dateRange
+
     const sorted = sortPets(filtered, sortOption);
     return sorted;
-  }, [pets, searchTerm, sortOption]);
+  }, [pets, sortOption, filters, selectedIds]);
 
   const displayedPets = useMemo(() => {
     return filteredAndSortedPets.slice(0, displayedCount);
@@ -119,7 +151,11 @@ const Home: React.FC = () => {
   // Reset displayed count when filters change
   useEffect(() => {
     setDisplayedCount(12);
-  }, [searchTerm, sortOption]);
+  }, [sortOption, filters]);
+
+  const handleFilterChange = useCallback((newFilters: FilterState) => {
+    setFilters(newFilters);
+  }, []);
 
   const loadMore = useCallback(() => {
     if (!hasMore || isLoadingMore) return;
@@ -185,18 +221,24 @@ const Home: React.FC = () => {
   // Always render the full layout, GalleryGrid will handle loading/error states
 
   return (
-    <Container>
-      <Header>
-        <HeaderContent>
-          <TitleSection>
-            <Title>Pet Gallery</Title>
-          </TitleSection>
-          <Controls>
-            <SearchBar value={searchTerm} onChange={setSearchTerm} />
-            <SortOptions value={sortOption} onChange={setSortOption} />
-          </Controls>
-        </HeaderContent>
-      </Header>
+    <Navigation onFilterChange={handleFilterChange}>
+      <PageHeader>
+        <TitleSection>
+          <Title>Premium Gallery</Title>
+          <Subtitle>
+            Explore your curated collection of high-resolution pet memories, organized by beauty and breed.
+          </Subtitle>
+        </TitleSection>
+        <SortContainer>
+          <SortLabel>Sort by:</SortLabel>
+          <SortSelect value={sortOption} onChange={(e) => setSortOption(e.target.value as SortOption)}>
+            <option value="name-asc">Alphabetical</option>
+            <option value="date-desc">Recent</option>
+            <option value="type">Type</option>
+          </SortSelect>
+        </SortContainer>
+      </PageHeader>
+
       <GalleryGrid
         pets={displayedPets}
         selectedIds={selectedIds}
@@ -205,11 +247,13 @@ const Home: React.FC = () => {
         error={error}
         onRetry={refetch}
       />
+
       {hasMore && (
         <LoadMoreTrigger ref={loadMoreRef}>
           {isLoadingMore && <LoadingSpinner />}
         </LoadMoreTrigger>
       )}
+
       <SelectionControls
         selectedCount={selectedCount}
         totalFileSize={totalFileSize}
@@ -220,7 +264,7 @@ const Home: React.FC = () => {
         allSelected={selectedCount === filteredAndSortedPets.length && filteredAndSortedPets.length > 0}
         isDownloading={isDownloading}
       />
-    </Container>
+    </Navigation>
   );
 };
 

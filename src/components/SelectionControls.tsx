@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { colors, typography, spacing, borderRadius, elevation, transitions, zIndex, gradients } from '../theme';
 
 interface SelectionControlsProps {
   selectedCount: number;
@@ -12,149 +13,198 @@ interface SelectionControlsProps {
   isDownloading?: boolean;
 }
 
-const Container = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 24px;
-  background: white;
-  border-top: 1px solid #e0e0e0;
-  flex-wrap: wrap;
-  position: sticky;
+const Container = styled.div<{ isVisible: boolean }>`
+  position: fixed;
   bottom: 0;
-  z-index: 50;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  left: 0;
+  right: 0;
+  z-index: ${zIndex.sticky};
+  padding: ${spacing.md};
+  pointer-events: none;
   
   @media (min-width: 768px) {
-    padding: 16px 32px;
+    padding: ${spacing.gutter};
   }
   
-  @media (min-width: 1024px) {
-    padding: 16px 40px;
+  ${props => props.isVisible && `
+    animation: slideUp 0.3s ease-out;
+  `}
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
+`;
+
+const Pill = styled.div`
+  pointer-events: auto;
+  background: ${colors.inverseSurface};
+  color: ${colors.inverseOnSurface};
+  border-radius: ${borderRadius.full};
+  padding: ${spacing.md} ${spacing.xl};
+  box-shadow: ${elevation.level3};
+  display: flex;
+  align-items: center;
+  gap: ${spacing.lg};
+  border: 1px solid ${colors.outlineVariant}20;
+  max-width: ${spacing.containerMax};
+  margin: 0 auto;
 `;
 
 const SelectionInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #333;
+  gap: ${spacing.sm};
+  padding-right: ${spacing.lg};
+  border-right: 1px solid ${colors.outline}30;
+`;
+
+const CountIndicator = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: ${borderRadius.full};
+  background: ${gradients.tealGradient};
+  color: ${colors.onPrimary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: ${typography.label.medium.fontSize};
+  font-family: ${typography.label.medium.fontFamily};
+`;
+
+const SelectionText = styled.span`
+  font-size: ${typography.label.medium.fontSize};
+  font-weight: ${typography.label.medium.fontWeight};
+  font-family: ${typography.label.medium.fontFamily};
+`;
+
+const Actions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.md};
   flex: 1;
-  min-width: 200px;
 `;
 
-const Count = styled.span`
-  font-weight: 600;
-`;
-
-const FileSize = styled.span`
-  color: #666;
-`;
-
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B';
-
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${(bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
-};
-
-const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
+const DownloadButton = styled.button`
+  background: ${colors.primaryFixed};
+  color: ${colors.onPrimaryFixed};
+  font-weight: 700;
+  padding: 8px 24px;
+  border-radius: ${borderRadius.full};
+  display: flex;
+  align-items: center;
+  gap: ${spacing.sm};
   border: none;
-  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  position: relative;
-
-  ${props => props.variant === 'primary' ? `
-    background: #3498db;
-    color: white;
-
-    &:hover:not(:disabled) {
-      background: #2980b9;
-    }
-
-    &:focus-visible {
-      outline: 2px solid #3498db;
-      outline-offset: 2px;
-    }
-  ` : `
-    background: #f0f0f0;
-    color: #333;
-
-    &:hover:not(:disabled) {
-      background: #e0e0e0;
-    }
-
-    &:focus-visible {
-      outline: 2px solid #666;
-      outline-offset: 2px;
-    }
-  `}
-
+  transition: ${transitions.default};
+  font-size: ${typography.label.medium.fontSize};
+  font-family: ${typography.label.medium.fontFamily};
+  
+  &:hover {
+    transform: scale(0.95);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+`;
 
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
+const ClearButton = styled.button`
+  background: none;
+  color: ${colors.onPrimaryContainer};
+  font-size: ${typography.label.medium.fontSize};
+  font-weight: ${typography.label.medium.fontWeight};
+  font-family: ${typography.label.medium.fontFamily};
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const CloseButton = styled.button`
+  margin-left: ${spacing.sm};
+  padding: 4px;
+  border-radius: ${borderRadius.full};
+  background: none;
+  border: none;
+  color: ${colors.inverseOnSurface};
+  cursor: pointer;
+  transition: ${transitions.default};
+  
+  &:hover {
+    background: ${colors.surfaceVariant}20;
   }
 `;
 
 export const SelectionControls: React.FC<SelectionControlsProps> = ({
   selectedCount,
   totalFileSize,
-  onSelectAll,
   onClearSelection,
   onDownload,
-  hasPets,
-  allSelected,
   isDownloading = false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onSelectAll,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  hasPets,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allSelected,
 }) => {
+  const isVisible = selectedCount > 0;
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${(bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
+  };
+
+  if (!isVisible) return null;
+
   return (
-    <Container>
-      <SelectionInfo>
-        {selectedCount > 0 ? (
-          <>
-            <Count>{selectedCount} selected</Count>
-            <FileSize>• {formatFileSize(totalFileSize)}</FileSize>
-          </>
-        ) : (
-          <span>No items selected</span>
-        )}
-      </SelectionInfo>
+    <Container isVisible={isVisible}>
+      <Pill>
+        <SelectionInfo>
+          <CountIndicator>{selectedCount}</CountIndicator>
+          <SelectionText>
+            {selectedCount === 1 ? 'Item selected' : 'Items selected'}
+            {totalFileSize > 0 && ` • ${formatFileSize(totalFileSize)}`}
+          </SelectionText>
+        </SelectionInfo>
 
-      <Button
-        variant="secondary"
-        onClick={allSelected ? onClearSelection : onSelectAll}
-        disabled={!hasPets}
-      >
-        {allSelected ? 'Clear Selection' : 'Select All'}
-      </Button>
+        <Actions>
+          <DownloadButton
+            onClick={onDownload}
+            disabled={isDownloading}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>download</span>
+            Download Selected
+          </DownloadButton>
 
-      <Button
-        variant="secondary"
-        onClick={onClearSelection}
-        disabled={selectedCount === 0}
-      >
-        Clear
-      </Button>
+          <ClearButton onClick={onClearSelection}>
+            Clear Selection
+          </ClearButton>
+        </Actions>
 
-      <Button
-        variant="primary"
-        onClick={onDownload}
-        disabled={selectedCount === 0 || isDownloading}
-      >
-        {isDownloading ? 'Downloading...' : `Download (${selectedCount})`}
-      </Button>
+        <CloseButton onClick={onClearSelection} aria-label="Close selection">
+          <span className="material-symbols-outlined">close</span>
+        </CloseButton>
+      </Pill>
     </Container>
   );
 };
