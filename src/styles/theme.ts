@@ -1,0 +1,51 @@
+export const theme = {
+  colors: {
+    primary: '#3498db',
+    primaryDark: '#2980b9',
+    secondary: '#666',
+    background: '#f5f5f5',
+    surface: '#ffffff',
+    border: '#e0e0e0',
+    text: '#333',
+    textLight: '#999',
+    error: '#e74c3c',
+    success: '#27ae60',
+  },
+  spacing: {
+    xs: '4px',
+    sm: '8px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+    xxl: '40px',
+    xxxl: '60px',
+  },
+  borderRadius: {
+    sm: '4px',
+    md: '6px',
+    lg: '8px',
+    xl: '12px',
+  },
+  shadows: {
+    sm: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    md: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    lg: '0 8px 24px rgba(0, 0, 0, 0.15)',
+    card: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    cardHover: '0 4px 16px rgba(0, 0, 0, 0.15)',
+  },
+  transitions: {
+    fast: '0.15s ease',
+    normal: '0.2s ease',
+    slow: '0.3s ease',
+  },
+  breakpoints: {
+    mobile: '768px',
+    tablet: '1024px',
+    desktop: '1200px',
+  },
+  zIndex: {
+    nav: 100,
+    modal: 1000,
+    overlay: 999,
+  },
+};

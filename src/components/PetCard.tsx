@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import type { Pet } from '../types/pet';
 
@@ -6,6 +7,7 @@ interface PetCardProps {
   pet: Pet;
   isSelected: boolean;
   onToggleSelection: (pet: Pet) => void;
+  link?: boolean;
 }
 
 const Card = styled.div`
@@ -20,6 +22,19 @@ const Card = styled.div`
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  &:focus-within {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    
+    &:hover {
+      transform: none;
+    }
   }
 `;
 
@@ -47,6 +62,15 @@ const Checkbox = styled.input`
   height: 20px;
   cursor: pointer;
   z-index: 2;
+
+  &:focus-visible {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `;
 
 const Content = styled.div`
@@ -84,16 +108,18 @@ const formatDate = (dateString: string) => {
   });
 };
 
-export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection }) => {
+export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection, link = false }) => {
   const handleCardClick = (e: React.MouseEvent) => {
     if (e.target !== e.currentTarget && !(e.target as HTMLElement).classList.contains('card-content')) {
       return;
     }
-    onToggleSelection(pet);
+    if (!link) {
+      onToggleSelection(pet);
+    }
   };
 
-  return (
-    <Card onClick={handleCardClick}>
+  const cardContent = (
+    <>
       <ImageContainer>
         <Image src={pet.url} alt={pet.title} loading="lazy" />
         <Checkbox
@@ -104,6 +130,8 @@ export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelec
             onToggleSelection(pet);
           }}
           onClick={(e) => e.stopPropagation()}
+          aria-label={`Select ${pet.title}`}
+          aria-checked={isSelected}
         />
       </ImageContainer>
       <Content className="card-content">
@@ -111,6 +139,22 @@ export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelec
         <Description>{pet.description}</Description>
         <DateText>{formatDate(pet.created)}</DateText>
       </Content>
+    </>
+  );
+
+  if (link) {
+    return (
+      <Link to={`/pets/${pet.id}`} style={{ textDecoration: 'none' }}>
+        <Card onClick={handleCardClick}>
+          {cardContent}
+        </Card>
+      </Link>
+    );
+  }
+
+  return (
+    <Card onClick={handleCardClick}>
+      {cardContent}
     </Card>
   );
 };

@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { usePetData } from '../hooks/usePetData';
 import { useSelection } from '../contexts/SelectionContext';
 import { GalleryGrid } from '../components/GalleryGrid';
+import { SearchBar } from '../components/SearchBar';
+import { SortOptions } from '../components/SortOptions';
+import { SelectionControls } from '../components/SelectionControls';
+import { Pagination } from '../components/Pagination';
+import { filterPets, sortPets } from '../utils/filterAndSort';
+import { downloadSelectedImages } from '../utils/download';
+import type { SortOption } from '../types/pet';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -23,6 +30,24 @@ const Header = styled.header`
   }
 `;
 
+const HeaderContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+`;
+
+const TitleSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
 const Title = styled.h1`
   margin: 0;
   font-size: 28px;
@@ -33,83 +58,122 @@ const Title = styled.h1`
   }
 `;
 
-const LoadingContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  font-size: 18px;
-  color: #666;
-`;
-
-const ErrorContainer = styled.div`
+const Controls = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  padding: 20px;
-  text-align: center;
-`;
-
-const ErrorMessage = styled.h2`
-  color: #e74c3c;
-  margin-bottom: 12px;
-`;
-
-const RetryButton = styled.button`
-  padding: 10px 20px;
-  background: #3498db;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  gap: 16px;
   
-  &:hover {
-    background: #2980b9;
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
   }
 `;
+
+
+
+
 
 const Home: React.FC = () => {
   const { pets, loading, error, refetch } = usePetData();
-  const { selectedIds, toggleSelection } = useSelection();
+  const {
+    selectedIds,
+    selectedPets,
+    selectedCount,
+    totalFileSize,
+    toggleSelection,
+    selectAll,
+    clearSelection
+  } = useSelection();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState<SortOption>('name-asc');
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PETS_PER_PAGE = 12;
 
-  if (loading) {
-    return (
-      <Container>
-        <Header>
-          <Title>Pet Gallery</Title>
-        </Header>
-        <LoadingContainer>Loading pets...</LoadingContainer>
-      </Container>
-    );
-  }
+  const filteredAndSortedPets = useMemo(() => {
+    const filtered = filterPets(pets, searchTerm);
+    const sorted = sortPets(filtered, sortOption);
+    return sorted;
+  }, [pets, searchTerm, sortOption]);
 
-  if (error) {
-    return (
-      <Container>
-        <Header>
-          <Title>Pet Gallery</Title>
-        </Header>
-        <ErrorContainer>
-          <ErrorMessage>{error}</ErrorMessage>
-          <RetryButton onClick={refetch}>Try Again</RetryButton>
-        </ErrorContainer>
-      </Container>
-    );
-  }
+  const paginatedPets = useMemo(() => {
+    const startIndex = (currentPage - 1) * PETS_PER_PAGE;
+    const endIndex = startIndex + PETS_PER_PAGE;
+    return filteredAndSortedPets.slice(startIndex, endIndex);
+  }, [filteredAndSortedPets, currentPage]);
+
+  const totalPages = Math.ceil(filteredAndSortedPets.length / PETS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, sortOption]);
+
+  const handleSelectAll = () => {
+    if (selectedCount === filteredAndSortedPets.length) {
+      clearSelection();
+    } else {
+      selectAll(filteredAndSortedPets);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (selectedCount === 0) return;
+
+    setIsDownloading(true);
+    try {
+      await downloadSelectedImages(selectedPets);
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Some downloads failed. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // Always render the full layout, GalleryGrid will handle loading/error states
 
   return (
     <Container>
       <Header>
-        <Title>Pet Gallery</Title>
+        <HeaderContent>
+          <TitleSection>
+            <Title>Pet Gallery</Title>
+          </TitleSection>
+          <Controls>
+            <SearchBar value={searchTerm} onChange={setSearchTerm} />
+            <SortOptions value={sortOption} onChange={setSortOption} />
+          </Controls>
+        </HeaderContent>
       </Header>
       <GalleryGrid
-        pets={pets}
+        pets={paginatedPets}
         selectedIds={selectedIds}
         onToggleSelection={toggleSelection}
+        loading={loading}
+        error={error}
+        onRetry={refetch}
+      />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+      <SelectionControls
+        selectedCount={selectedCount}
+        totalFileSize={totalFileSize}
+        onSelectAll={handleSelectAll}
+        onClearSelection={clearSelection}
+        onDownload={handleDownload}
+        hasPets={filteredAndSortedPets.length > 0}
+        allSelected={selectedCount === filteredAndSortedPets.length && filteredAndSortedPets.length > 0}
+        isDownloading={isDownloading}
       />
     </Container>
   );

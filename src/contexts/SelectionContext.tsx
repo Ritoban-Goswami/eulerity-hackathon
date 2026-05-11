@@ -23,7 +23,8 @@ type SelectionAction =
   | { type: 'TOGGLE_SELECTION'; payload: Pet }
   | { type: 'SELECT_ALL'; payload: Pet[] }
   | { type: 'CLEAR_SELECTION' }
-  | { type: 'LOAD_FROM_STORAGE'; payload: string[] };
+  | { type: 'LOAD_FROM_STORAGE'; payload: string[] }
+  | { type: 'UPDATE_FILE_SIZE'; payload: number };
 
 const selectionReducer = (state: SelectionState, action: SelectionAction): SelectionState => {
   switch (action.type) {
@@ -61,7 +62,11 @@ const selectionReducer = (state: SelectionState, action: SelectionAction): Selec
       return { selectedIds: new Set<string>(), totalFileSize: 0 };
     }
     case 'LOAD_FROM_STORAGE': {
-      return { selectedIds: new Set(action.payload), totalFileSize: 0 };
+      const newSelectedIds = new Set(action.payload);
+      return { selectedIds: newSelectedIds, totalFileSize: 0 };
+    }
+    case 'UPDATE_FILE_SIZE': {
+      return { ...state, totalFileSize: action.payload };
     }
     default:
       return state;
@@ -101,6 +106,8 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children, 
 
   // Recalculate total file size when allPets change (for cases where file sizes become available)
   useEffect(() => {
+    if (allPets.length === 0) return;
+
     const totalFileSize = Array.from(state.selectedIds)
       .reduce<number>((sum, id) => {
         const pet = allPets.find(p => p.id === id);
@@ -108,14 +115,10 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children, 
       }, 0);
 
     if (totalFileSize !== state.totalFileSize) {
-      // Clear and reselect to recalculate file sizes
-      const selectedPets = allPets.filter(pet => state.selectedIds.has(pet.id));
-      dispatch({ type: 'CLEAR_SELECTION' });
-      if (selectedPets.length > 0) {
-        dispatch({ type: 'SELECT_ALL', payload: selectedPets });
-      }
+      // Update total file size directly
+      dispatch({ type: 'UPDATE_FILE_SIZE', payload: totalFileSize });
     }
-  }, [allPets, state.selectedIds, state.totalFileSize]);
+  }, [allPets]);
 
   const selectPet = (pet: Pet) => {
     dispatch({ type: 'SELECT_PET', payload: pet });
