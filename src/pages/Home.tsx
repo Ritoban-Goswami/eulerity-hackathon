@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import { useSelection } from '../contexts/SelectionContext';
 import { GalleryGrid } from '../components/GalleryGrid';
 import { SearchBar } from '../components/SearchBar';
 import { SortOptions } from '../components/SortOptions';
 import { SelectionControls } from '../components/SelectionControls';
-import { Pagination } from '../components/Pagination';
 import { filterPets, sortPets } from '../utils/filterAndSort';
 import { downloadSelectedImages } from '../utils/download';
 import type { SortOption } from '../types/pet';
@@ -73,13 +72,37 @@ const Controls = styled.div`
 
 
 
+const LoadMoreTrigger = styled.div`
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+`;
+
+const LoadingSpinner = styled.div`
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
 const Home: React.FC = () => {
   const { pets, loading, error, refetch, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, selectAll, clearSelection } = useSelection();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('name-asc');
   const [isDownloading, setIsDownloading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [displayedCount, setDisplayedCount] = useState(12);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PETS_PER_PAGE = 12;
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const filteredAndSortedPets = useMemo(() => {
     const filtered = filterPets(pets, searchTerm);
@@ -87,23 +110,55 @@ const Home: React.FC = () => {
     return sorted;
   }, [pets, searchTerm, sortOption]);
 
-  const paginatedPets = useMemo(() => {
-    const startIndex = (currentPage - 1) * PETS_PER_PAGE;
-    const endIndex = startIndex + PETS_PER_PAGE;
-    return filteredAndSortedPets.slice(startIndex, endIndex);
-  }, [filteredAndSortedPets, currentPage]);
+  const displayedPets = useMemo(() => {
+    return filteredAndSortedPets.slice(0, displayedCount);
+  }, [filteredAndSortedPets, displayedCount]);
 
-  const totalPages = Math.ceil(filteredAndSortedPets.length / PETS_PER_PAGE);
+  const hasMore = displayedCount < filteredAndSortedPets.length;
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Reset to page 1 when filters change
+  // Reset displayed count when filters change
   useEffect(() => {
-    setCurrentPage(1);
+    setDisplayedCount(12);
   }, [searchTerm, sortOption]);
+
+  const loadMore = useCallback(() => {
+    if (!hasMore || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    // Brief delay for visual feedback
+    setTimeout(() => {
+      setDisplayedCount(prev => Math.min(prev + PETS_PER_PAGE, filteredAndSortedPets.length));
+      setIsLoadingMore(false);
+    }, 100);
+  }, [hasMore, isLoadingMore, filteredAndSortedPets.length]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting && hasMore && !isLoadingMore) {
+          loadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: '100px',
+        threshold: 0.1
+      }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [loadMore, hasMore, isLoadingMore]);
 
   const handleSelectAll = () => {
     if (selectedCount === filteredAndSortedPets.length) {
@@ -143,18 +198,18 @@ const Home: React.FC = () => {
         </HeaderContent>
       </Header>
       <GalleryGrid
-        pets={paginatedPets}
+        pets={displayedPets}
         selectedIds={selectedIds}
         onToggleSelection={toggleSelection}
         loading={loading}
         error={error}
         onRetry={refetch}
       />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      {hasMore && (
+        <LoadMoreTrigger ref={loadMoreRef}>
+          {isLoadingMore && <LoadingSpinner />}
+        </LoadMoreTrigger>
+      )}
       <SelectionControls
         selectedCount={selectedCount}
         totalFileSize={totalFileSize}
