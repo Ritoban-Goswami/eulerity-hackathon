@@ -1,26 +1,39 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  elevation,
+  transitions
+} from '../theme';
+import { Navigation } from '../components/Layout/Navigation';
 
-const Container = styled.div`
-  min-height: 100vh;
-  background: #f5f5f5;
+const NotFoundContainer = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
+  padding: ${spacing.xl};
+  text-align: center;
 `;
 
-const Content = styled.div`
-  text-align: center;
+const ContentCard = styled.div`
+  background: ${colors.surfaceContainerLowest};
+  padding: ${spacing.xl};
+  border-radius: ${borderRadius.lg};
+  box-shadow: ${elevation.level1};
   max-width: 500px;
+  width: 100%;
 `;
 
 const ErrorCode = styled.h1`
-  font-size: 120px;
-  font-weight: 700;
-  color: #3498db;
-  margin: 0;
+  font-size: ${typography.display.fontSize};
+  font-weight: ${typography.display.fontWeight};
+  font-family: ${typography.display.fontFamily};
+  color: ${colors.primary};
   line-height: 1;
   
   @media (max-width: 768px) {
@@ -29,51 +42,82 @@ const ErrorCode = styled.h1`
 `;
 
 const Title = styled.h2`
-  font-size: 32px;
-  color: #333;
-  margin: 24px 0 16px 0;
+  font-size: ${typography.headline.large.fontSize};
+  font-weight: ${typography.headline.large.fontWeight};
+  font-family: ${typography.headline.large.fontFamily};
+  color: ${colors.onSurface};
+  margin: ${spacing.lg} 0 ${spacing.md} 0;
   
   @media (max-width: 768px) {
-    font-size: 24px;
+    font-size: ${typography.headline.medium.fontSize};
   }
 `;
 
 const Message = styled.p`
-  font-size: 18px;
-  color: #666;
-  margin: 0 0 32px 0;
+  font-size: ${typography.body.large.fontSize};
+  font-weight: ${typography.body.large.fontWeight};
+  font-family: ${typography.body.large.fontFamily};
+  color: ${colors.onSurfaceVariant};
+  margin: 0 0 ${spacing.xl} 0;
   line-height: 1.5;
 `;
 
-const HomeLink = styled(Link)`
-  display: inline-block;
-  padding: 12px 32px;
-  background: #3498db;
-  color: white;
+const HomeButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: ${spacing.sm};
+  padding: ${spacing.md} ${spacing.xl};
+  background: ${colors.primary};
+  color: ${colors.onPrimary};
   text-decoration: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  transition: background 0.2s ease;
+  border-radius: ${borderRadius.lg};
+  font-size: ${typography.label.medium.fontSize};
+  font-weight: ${typography.label.medium.fontWeight};
+  font-family: ${typography.label.medium.fontFamily};
+  transition: ${transitions.default};
   
   &:hover {
-    background: #2980b9;
+    background: ${colors.primary}90;
+    transform: translateY(-2px);
+    box-shadow: ${elevation.level2};
   }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const IconContainer = styled.div`
+  margin-bottom: ${spacing.lg};
 `;
 
 const NotFound: React.FC = () => {
   return (
-    <Container>
-      <Content>
-        <ErrorCode>404</ErrorCode>
-        <Title>Page Not Found</Title>
-        <Message>
-          Oops! The page you're looking for doesn't exist.
-          It might have been moved, deleted, or you entered the wrong URL.
-        </Message>
-        <HomeLink to="/">Go Back Home</HomeLink>
-      </Content>
-    </Container>
+    <Navigation>
+      <NotFoundContainer>
+        <ContentCard>
+          <IconContainer>
+            <span className="material-symbols-outlined" style={{
+              fontSize: '120px',
+              color: colors.primary,
+              opacity: 0.3
+            }}>
+              pets
+            </span>
+          </IconContainer>
+          <ErrorCode>404</ErrorCode>
+          <Title>Page Not Found</Title>
+          <Message>
+            Oops! The page you're looking for doesn't exist.
+            It might have been moved, deleted, or you entered the wrong URL.
+          </Message>
+          <HomeButton to="/">
+            <span className="material-symbols-outlined">home</span>
+            Go Back Home
+          </HomeButton>
+        </ContentCard>
+      </NotFoundContainer>
+    </Navigation>
   );
 };
 

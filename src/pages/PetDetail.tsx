@@ -1,167 +1,299 @@
-import React, { useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useSelection } from '../contexts/SelectionContext';
+import {
+  colors,
+  typography,
+  spacing,
+  borderRadius,
+  elevation,
+  transitions,
+  breakpoints
+} from '../theme';
+import { Navigation } from '../components/Layout/Navigation';
 import { PetCard } from '../components/PetCard';
+import { useSelection } from '../contexts/SelectionContext';
 
-const Container = styled.div`
-  min-height: 100vh;
-  background: #f5f5f5;
-  padding: 40px 24px;
+// Styled Components
+const PetDetailContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: ${spacing.lg};
+  padding-top: ${spacing.lg};
   
-  @media (min-width: 768px) {
-    padding: 60px 32px;
-  }
-  
-  @media (min-width: 1024px) {
-    padding: 80px 40px;
-    max-width: 1200px;
-    margin: 0 auto;
+  @media (min-width: ${breakpoints.tablet}) {
+    grid-template-columns: 8fr 4fr;
   }
 `;
 
-const BackButton = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: white;
-  color: #666;
-  text-decoration: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  margin-bottom: 32px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-  &:hover {
-    background: #f0f0f0;
-    color: #333;
+const ImageSection = styled.div`
+  @media (min-width: ${breakpoints.tablet}) {
+    grid-column: 1;
   }
 `;
 
-const Content = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-  
-  @media (min-width: 1024px) {
-    flex-direction: row;
-    gap: 60px;
-  }
-`;
-
-const MainContent = styled.div`
-  flex: 1;
-`;
-
-const ImageContainer = styled.div`
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  
-  @media (min-width: 1024px) {
-    max-width: 600px;
-  }
-`;
-
-const Image = styled.img`
+const MainImage = styled.img`
   width: 100%;
   height: auto;
-  display: block;
+  border-radius: ${borderRadius.lg};
+  box-shadow: ${elevation.level2};
 `;
 
-const Info = styled.div`
-  background: white;
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-`;
-
-const Title = styled.h1`
-  margin: 0 0 16px 0;
-  font-size: 32px;
-  color: #333;
+const InfoSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${spacing.lg};
   
-  @media (min-width: 768px) {
-    font-size: 40px;
+  @media (min-width: ${breakpoints.tablet}) {
+    grid-column: 2;
   }
 `;
 
-const Description = styled.p`
-  margin: 0 0 24px 0;
-  font-size: 18px;
-  line-height: 1.6;
-  color: #666;
+const PetName = styled.h1`
+  font-size: ${typography.headline.large.fontSize};
+  font-weight: ${typography.headline.large.fontWeight};
+  font-family: ${typography.headline.large.fontFamily};
+  color: ${colors.onSurface};
 `;
 
-const Meta = styled.div`
+const TagContainer = styled.div`
+  display: flex;
+  gap: ${spacing.sm};
+  flex-wrap: wrap;
+`;
+
+const Tag = styled.span`
+  padding: ${spacing.xs} ${spacing.sm};
+  background: ${colors.primaryContainer};
+  color: ${colors.onPrimaryContainer};
+  border-radius: ${borderRadius.full};
+  font-size: ${typography.label.medium.fontSize};
+  font-weight: ${typography.label.medium.fontWeight};
+  font-family: ${typography.label.medium.fontFamily};
+`;
+
+const MetadataGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${spacing.md};
+  padding: ${spacing.md};
+  background: ${colors.surfaceContainer};
+  border-radius: ${borderRadius.lg};
+  border: 1px solid ${colors.outlineVariant}20;
+  box-shadow: ${elevation.level1};
+`;
+
+const MetadataItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const MetadataLabel = styled.span`
+  font-size: ${typography.label.small.fontSize};
+  font-weight: ${typography.label.small.fontWeight};
+  font-family: ${typography.label.small.fontFamily};
+  color: ${colors.onSurfaceVariant};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
+const MetadataValue = styled.span`
+  font-size: ${typography.body.medium.fontSize};
+  font-weight: ${typography.body.medium.fontWeight};
+  font-family: ${typography.body.medium.fontFamily};
+  color: ${colors.onSurface};
+`;
+
+const BreadcrumbNav = styled.nav`
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding-top: 24px;
-  border-top: 1px solid #e0e0e0;
+  gap: ${spacing.xs};
+  font-size: ${typography.label.small.fontSize};
+  font-weight: ${typography.label.small.fontWeight};
+  font-family: ${typography.label.small.fontFamily};
+  color: ${colors.onSurfaceVariant};
+  margin-bottom: ${spacing.sm};
 `;
 
-const DateText = styled.span`
+const BreadcrumbLink = styled.a`
+  color: ${colors.onSurfaceVariant};
+  text-decoration: none;
+  
+  &:hover {
+    color: ${colors.primary};
+  }
+`;
+
+const BreadcrumbSeparator = styled.span`
+  color: ${colors.onSurfaceVariant};
   font-size: 14px;
-  color: #999;
 `;
 
-const SelectionLabel = styled.label`
+const BreadcrumbCurrent = styled.span`
+  color: ${colors.primary};
+  font-weight: ${typography.label.small.fontWeight};
+`;
+
+const StorySection = styled.div`
   display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  color: #333;
+  flex-direction: column;
+  gap: ${spacing.sm};
 `;
 
-const Checkbox = styled.input`
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
+const StoryTitle = styled.h2`
+  font-size: ${typography.headline.medium.fontSize};
+  font-weight: ${typography.headline.medium.fontWeight};
+  font-family: ${typography.headline.medium.fontFamily};
+  color: ${colors.onSurface};
 `;
 
-const RelatedSection = styled.div`
-  flex: 0 0 350px;
+const StoryText = styled.p`
+  font-size: ${typography.body.medium.fontSize};
+  font-weight: ${typography.body.medium.fontWeight};
+  font-family: ${typography.body.medium.fontFamily};
+  color: ${colors.onSurface};
+  line-height: 1.6;
+`;
+
+const ActionButtons = styled.div`
+  display: none;
+  flex-direction: column;
+  gap: ${spacing.sm};
   
-  @media (max-width: 1023px) {
-    flex: 1;
+  @media (min-width: ${breakpoints.tablet}) {
+    display: flex;
   }
 `;
 
-const SectionTitle = styled.h2`
-  margin: 0 0 24px 0;
-  font-size: 24px;
-  color: #333;
+const MobileActionButtons = styled.div`
+  display: flex;
+  gap: ${spacing.sm};
+  margin-top: ${spacing.md};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    display: none;
+  }
+`;
+
+const ActionButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
+  padding: ${spacing.sm} ${spacing.md};
+  border-radius: ${borderRadius.lg};
+  border: none;
+  font-size: ${typography.label.medium.fontSize};
+  font-weight: ${typography.label.medium.fontWeight};
+  font-family: ${typography.label.medium.fontFamily};
+  cursor: pointer;
+  transition: ${transitions.default};
+  display: flex;
+  align-items: center;
+  gap: ${spacing.xs};
+  
+  background: ${props => props.variant === 'primary' ? colors.primary : colors.surfaceContainerHigh};
+  color: ${props => props.variant === 'primary' ? colors.onPrimary : colors.onSurface};
+  
+  &:hover {
+    background: ${props => props.variant === 'primary' ? colors.primary : colors.surfaceContainerHover};
+    transform: translateY(-1px);
+    box-shadow: ${elevation.level1};
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const CollectionSection = styled.div`
+  margin-top: ${spacing.xl};
+`;
+
+const CollectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: ${spacing.lg};
+`;
+
+const CollectionTitleSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${spacing.xs};
+`;
+
+const CollectionSubtitle = styled.p`
+  font-size: ${typography.body.medium.fontSize};
+  font-weight: ${typography.body.medium.fontWeight};
+  font-family: ${typography.body.medium.fontFamily};
+  color: ${colors.onSurfaceVariant};
+`;
+
+const CollectionTitle = styled.h2`
+  font-size: ${typography.headline.medium.fontSize};
+  font-weight: ${typography.headline.medium.fontWeight};
+  font-family: ${typography.headline.medium.fontFamily};
+  color: ${colors.onSurface};
+`;
+
+const ViewAllLink = styled.a`
+  color: ${colors.primary};
+  font-size: ${typography.body.medium.fontSize};
+  font-weight: ${typography.body.medium.fontWeight};
+  font-family: ${typography.body.medium.fontFamily};
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const RelatedGrid = styled.div`
   display: grid;
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: ${spacing.md};
   
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
+  @media (min-width: ${breakpoints.mobile}) {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 `;
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+// Sample extended pet data - in real app, this would come from API
+const getExtendedPetData = (pet: any) => {
+  // Generate some sample metadata based on the pet
+  const metadata = {
+    dateAdded: new Date(pet.created).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }),
+    resolution: '4000 x 5000 px',
+    fileSize: '4.8 MB',
+    camera: 'Sony a7R IV',
+    story: `${pet.title} is a wonderful pet with a unique personality. This adorable companion brings joy and happiness to everyone around. With their charming antics and loving nature, they've become an integral part of the family. Whether it's playtime in the park or cozy evenings at home, this pet knows how to make every moment special. Their favorite activities include playing with toys, exploring the outdoors, and spending quality time with their loved ones.`
+  };
+
+  // Extract breed from description or use a default
+  const breedGuess = pet.description.includes('Golden') ? 'Golden Retriever' :
+    pet.description.includes('Lab') ? 'Labrador' :
+      pet.description.includes('Cat') ? 'Persian' :
+        pet.description.includes('Beagle') ? 'Beagle' : 'Mixed Breed';
+
+  return {
+    ...pet,
+    breed: breedGuess,
+    type: pet.title.toLowerCase().includes('cat') ? 'Cat' : 'Dog',
+    ...metadata
+  };
 };
 
 const PetDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { pets, loading, selectedIds, toggleSelection } = useSelection();
+  const [isFavorited, setIsFavorited] = useState(false);
 
   const pet = useMemo(() => {
-    return pets.find(p => p.id === id);
+    const foundPet = pets.find(p => p.id === id);
+    return foundPet ? getExtendedPetData(foundPet) : null;
   }, [pets, id]);
 
   const relatedPets = useMemo(() => {
@@ -172,72 +304,164 @@ const PetDetail: React.FC = () => {
     return shuffled.slice(0, 4);
   }, [pet, pets]);
 
+  const handleDownload = () => {
+    // Implement download functionality
+    console.log('Downloading original image...');
+    const link = document.createElement('a');
+    link.href = pet?.url || '';
+    link.download = `${pet?.title || 'pet'}-original.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleFavorite = () => {
+    setIsFavorited(!isFavorited);
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: pet?.title,
+          text: pet?.description,
+          url: window.location.href
+        });
+      } catch (err) {
+        console.log('Error sharing:', err);
+      }
+    } else {
+      // Fallback - copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
+  };
+
   if (loading) {
     return (
-      <Container>
-        <div>Loading...</div>
-      </Container>
+      <Navigation>
+        <div style={{ padding: spacing.xl }}>Loading...</div>
+      </Navigation>
     );
   }
 
   if (!pet) {
     return (
-      <Container>
-        <div>Pet not found</div>
-      </Container>
+      <Navigation>
+        <div style={{ padding: spacing.xl }}>Pet not found</div>
+      </Navigation>
     );
   }
 
-  const isSelected = selectedIds.has(pet.id);
 
   return (
-    <Container>
-      <BackButton to="/">
-        ← Back to Gallery
-      </BackButton>
+    <Navigation>
+      <PetDetailContainer>
+        <ImageSection>
+          <MainImage src={pet.url} alt={pet.title} />
+          <MobileActionButtons>
+            <ActionButton variant="primary" onClick={handleDownload} style={{ flex: 1 }}>
+              <span className="material-symbols-outlined">download</span>
+              Download
+            </ActionButton>
+            <ActionButton variant="secondary" onClick={handleFavorite} style={{ flex: 1 }}>
+              <span className="material-symbols-outlined">
+                {isFavorited ? 'favorite' : 'favorite_border'}
+              </span>
+              Favorite
+            </ActionButton>
+            <ActionButton variant="secondary" onClick={handleShare} style={{ width: '48px' }}>
+              <span className="material-symbols-outlined">share</span>
+            </ActionButton>
+          </MobileActionButtons>
+        </ImageSection>
 
-      <Content>
-        <MainContent>
-          <ImageContainer>
-            <Image src={pet.url} alt={pet.title} />
-          </ImageContainer>
+        <InfoSection>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
+            <BreadcrumbNav>
+              <BreadcrumbLink href="#" onClick={(e) => { e.preventDefault(); navigate('/'); }}>Gallery</BreadcrumbLink>
+              <BreadcrumbSeparator className="material-symbols-outlined" style={{ fontSize: '14px' }}>chevron_right</BreadcrumbSeparator>
+              <BreadcrumbLink href="#" onClick={(e) => { e.preventDefault(); }}>{pet.type}s</BreadcrumbLink>
+              <BreadcrumbSeparator className="material-symbols-outlined" style={{ fontSize: '14px' }}>chevron_right</BreadcrumbSeparator>
+              <BreadcrumbCurrent>{pet.breed}</BreadcrumbCurrent>
+            </BreadcrumbNav>
+            <PetName>{pet.title}</PetName>
+            <TagContainer>
+              <Tag>{pet.type}</Tag>
+              <Tag>{pet.breed}</Tag>
+            </TagContainer>
+          </div>
 
-          <Info>
-            <Title>{pet.title}</Title>
-            <Description>{pet.description}</Description>
+          <MetadataGrid>
+            <MetadataItem>
+              <MetadataLabel>Date Added</MetadataLabel>
+              <MetadataValue>{pet.dateAdded}</MetadataValue>
+            </MetadataItem>
+            <MetadataItem>
+              <MetadataLabel>Resolution</MetadataLabel>
+              <MetadataValue>{pet.resolution}</MetadataValue>
+            </MetadataItem>
+            <MetadataItem>
+              <MetadataLabel>File Size</MetadataLabel>
+              <MetadataValue>{pet.fileSize}</MetadataValue>
+            </MetadataItem>
+            <MetadataItem>
+              <MetadataLabel>Camera</MetadataLabel>
+              <MetadataValue>{pet.camera}</MetadataValue>
+            </MetadataItem>
+          </MetadataGrid>
 
-            <Meta>
-              <DateText>Added on {formatDate(pet.created)}</DateText>
-              <SelectionLabel>
-                <Checkbox
-                  type="checkbox"
-                  checked={isSelected}
-                  onChange={() => toggleSelection(pet)}
-                />
-                Select this pet
-              </SelectionLabel>
-            </Meta>
-          </Info>
-        </MainContent>
+          <StorySection>
+            <StoryTitle>Story</StoryTitle>
+            <StoryText>{pet.story}</StoryText>
+          </StorySection>
 
-        {relatedPets.length > 0 && (
-          <RelatedSection>
-            <SectionTitle>Related Pets</SectionTitle>
-            <RelatedGrid>
-              {relatedPets.map(relatedPet => (
-                <PetCard
-                  key={relatedPet.id}
-                  pet={relatedPet}
-                  isSelected={selectedIds.has(relatedPet.id)}
-                  onToggleSelection={toggleSelection}
-                  link={true}
-                />
-              ))}
-            </RelatedGrid>
-          </RelatedSection>
-        )}
-      </Content>
-    </Container>
+          <ActionButtons>
+            <ActionButton variant="primary" onClick={handleDownload}>
+              <span className="material-symbols-outlined">download</span>
+              Download Original
+            </ActionButton>
+            <div style={{ display: 'flex', gap: spacing.sm }}>
+              <ActionButton variant="secondary" onClick={handleFavorite} style={{ flex: 1 }}>
+                <span className="material-symbols-outlined">
+                  {isFavorited ? 'favorite' : 'favorite_border'}
+                </span>
+                {isFavorited ? 'Favorited' : 'Favorite'}
+              </ActionButton>
+              <ActionButton variant="secondary" onClick={handleShare} style={{ flex: 1 }}>
+                <span className="material-symbols-outlined">share</span>
+                Share
+              </ActionButton>
+            </div>
+          </ActionButtons>
+        </InfoSection>
+      </PetDetailContainer>
+
+      {relatedPets.length > 0 && (
+        <CollectionSection>
+          <CollectionHeader>
+            <CollectionTitleSection>
+              <CollectionTitle>More from this Collection</CollectionTitle>
+              <CollectionSubtitle>Explore the full Golden Hour series.</CollectionSubtitle>
+            </CollectionTitleSection>
+            <ViewAllLink href="#" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
+              View All
+            </ViewAllLink>
+          </CollectionHeader>
+          <RelatedGrid>
+            {relatedPets.map((relatedPet) => (
+              <PetCard
+                key={relatedPet.id}
+                pet={relatedPet}
+                isSelected={selectedIds.has(relatedPet.id)}
+                onToggleSelection={toggleSelection}
+                link={true}
+              />
+            ))}
+          </RelatedGrid>
+        </CollectionSection>
+      )}
+    </Navigation>
   );
 };
 

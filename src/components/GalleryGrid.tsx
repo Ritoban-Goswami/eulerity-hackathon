@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { PetCard } from './PetCard';
 import { LoadingSkeleton } from './LoadingSkeleton';
+import { colors, typography, spacing } from '../theme';
 import type { Pet } from '../types/pet';
 
 interface GalleryGridProps {
@@ -16,8 +17,7 @@ interface GalleryGridProps {
 
 const Grid = styled.div`
   display: grid;
-  gap: 24px;
-  padding: 24px;
+  gap: ${spacing.md};
   
   /* Mobile: 1 column */
   grid-template-columns: 1fr;
@@ -25,15 +25,18 @@ const Grid = styled.div`
   /* Tablet: 2 columns */
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
-    padding: 32px;
-    gap: 32px;
+    gap: ${spacing.md};
   }
   
-  /* Desktop: 4 columns */
+  /* Desktop: 3 columns */
   @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: ${spacing.md};
+  }
+  
+  /* Large desktop: 4 columns */
+  @media (min-width: 1280px) {
     grid-template-columns: repeat(4, 1fr);
-    padding: 40px;
-    gap: 32px;
   }
 `;
 
@@ -41,35 +44,40 @@ const EmptyState = styled.div`
   grid-column: 1 / -1;
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: ${colors.onSurfaceVariant};
 `;
 
 const EmptyTitle = styled.h2`
-  font-size: 24px;
+  font-size: ${typography.headline.medium.fontSize};
+  font-weight: ${typography.headline.medium.fontWeight};
+  font-family: ${typography.headline.medium.fontFamily};
   margin-bottom: 12px;
-  color: #333;
+  color: ${colors.onSurface};
 `;
 
 const EmptyMessage = styled.p`
-  font-size: 16px;
+  font-size: ${typography.body.medium.fontSize};
+  font-weight: ${typography.body.medium.fontWeight};
+  font-family: ${typography.body.medium.fontFamily};
   max-width: 400px;
   margin: 0 auto;
+  line-height: ${typography.body.medium.lineHeight};
 `;
 
 const RetryButton = styled.button`
   margin-top: 24px;
   padding: 12px 24px;
-  background: #3498db;
-  color: white;
+  background: ${colors.primary};
+  color: ${colors.onPrimary};
   border: none;
-  border-radius: 6px;
-  font-size: 16px;
+  border-radius: 8px;
+  font-size: ${typography.body.medium.fontSize};
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s ease;
 
   &:hover {
-    background: #2980b9;
+    background: ${colors.primaryContainer};
   }
 `;
 

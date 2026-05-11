@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { colors, typography, spacing, borderRadius, elevation, transitions, aspectRatios } from '../theme';
 import type { Pet } from '../types/pet';
 
 interface PetCardProps {
@@ -10,22 +11,22 @@ interface PetCardProps {
   link?: boolean;
 }
 
-const Card = styled.div`
+const Card = styled.article`
   position: relative;
-  border-radius: 8px;
+  background: ${colors.surfaceContainerLowest};
+  border-radius: ${borderRadius.lg};
   overflow: hidden;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: ${elevation.level1};
+  transition: ${transitions.hover};
   cursor: pointer;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: ${elevation.level2};
   }
 
   &:focus-within {
-    outline: 2px solid #3498db;
+    outline: 2px solid ${colors.primary};
     outline-offset: 2px;
   }
 
@@ -40,31 +41,36 @@ const Card = styled.div`
 
 const ImageContainer = styled.div`
   position: relative;
-  width: 100%;
-  padding-bottom: 75%;
+  aspect-ratio: ${aspectRatios.petCard};
   overflow: hidden;
 `;
 
 const Image = styled.img`
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: ${transitions.imageZoom};
+  
+  ${Card}:hover & {
+    transform: scale(1.1);
+  }
 `;
 
 const Checkbox = styled.input`
   position: absolute;
-  top: 12px;
-  left: 12px;
-  width: 20px;
-  height: 20px;
+  top: ${spacing.sm};
+  right: ${spacing.sm};
+  width: 24px;
+  height: 24px;
   cursor: pointer;
-  z-index: 2;
+  z-index: 10;
+  border-radius: ${borderRadius.DEFAULT};
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.2);
+  transition: ${transitions.default};
 
   &:focus-visible {
-    outline: 2px solid #3498db;
+    outline: 2px solid ${colors.primary};
     outline-offset: 2px;
   }
 
@@ -73,31 +79,95 @@ const Checkbox = styled.input`
   }
 `;
 
+const Overlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent, transparent);
+  opacity: 0;
+  transition: ${transitions.fadeIn};
+  display: flex;
+  align-items: flex-end;
+  padding: ${spacing.md};
+  
+  ${Card}:hover & {
+    opacity: 1;
+  }
+`;
+
+const QuickViewButton = styled.button`
+  color: ${colors.onPrimary};
+  display: flex;
+  align-items: center;
+  gap: ${spacing.xs};
+  font-size: ${typography.label.medium.fontSize};
+  font-weight: ${typography.label.medium.fontWeight};
+  font-family: ${typography.label.medium.fontFamily};
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const Content = styled.div`
-  padding: 16px;
+  padding: ${spacing.md};
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
 `;
 
 const Title = styled.h3`
-  margin: 0 0 8px 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
+  margin: 0;
+  font-size: ${typography.headline.medium.fontSize};
+  font-weight: ${typography.headline.medium.fontWeight};
+  font-family: ${typography.headline.medium.fontFamily};
+  color: ${colors.primary};
+`;
+
+const BreedBadge = styled.span`
+  background: ${colors.primary}10;
+  color: ${colors.primary};
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: ${borderRadius.full};
+  letter-spacing: 0.05em;
 `;
 
 const Description = styled.p`
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  color: #666;
-  line-height: 1.4;
+  font-size: ${typography.body.medium.fontSize};
+  font-weight: ${typography.body.medium.fontWeight};
+  font-family: ${typography.body.medium.fontFamily};
+  color: ${colors.onSurfaceVariant};
+  line-height: ${typography.body.medium.lineHeight};
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 `;
 
-const DateText = styled.span`
-  font-size: 12px;
-  color: #999;
+const Metadata = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: ${typography.label.small.fontSize};
+  font-weight: ${typography.label.small.fontWeight};
+  font-family: ${typography.label.small.fontFamily};
+  color: ${colors.outline};
+`;
+
+const MetadataItem = styled.span`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.xs};
 `;
 
 const formatDate = (dateString: string) => {
@@ -106,6 +176,19 @@ const formatDate = (dateString: string) => {
     month: 'short',
     day: 'numeric',
   });
+};
+
+const extractBreed = (title: string) => {
+  // Simple breed extraction - in real app, this would come from the data
+  const breeds = ['Golden Retriever', 'Tabby', 'Bulldog', 'Persian', 'Siamese', 'Poodle', 'Labrador'];
+  const found = breeds.find(breed => title.toLowerCase().includes(breed.toLowerCase()));
+  return found || 'Unknown';
+};
+
+const formatFileSize = () => {
+  // Mock file size - in real app, this would come from the data
+  const sizes = ['20MP', '24MP', '42MP', '61MP'];
+  return sizes[Math.floor(Math.random() * sizes.length)];
 };
 
 export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection, link = false }) => {
@@ -118,10 +201,19 @@ export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelec
     }
   };
 
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // TODO: Implement quick view modal
+    console.log('Quick view:', pet.id);
+  };
+
+  const breed = extractBreed(pet.title);
+  const fileSize = formatFileSize();
+
   const cardContent = (
     <>
       <ImageContainer>
-        <Image src={pet.url} alt={pet.title} loading="lazy" />
+        <Image src={pet.url} alt={pet.description} loading="lazy" />
         <Checkbox
           type="checkbox"
           checked={isSelected}
@@ -133,18 +225,36 @@ export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelec
           aria-label={`Select ${pet.title}`}
           aria-checked={isSelected}
         />
+        <Overlay>
+          <QuickViewButton onClick={handleQuickView}>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>visibility</span>
+            Quick View
+          </QuickViewButton>
+        </Overlay>
       </ImageContainer>
       <Content className="card-content">
-        <Title>{pet.title}</Title>
+        <Header>
+          <Title>{pet.title}</Title>
+          <BreedBadge>{breed.replace(' ', '')}</BreedBadge>
+        </Header>
         <Description>{pet.description}</Description>
-        <DateText>{formatDate(pet.created)}</DateText>
+        <Metadata>
+          <MetadataItem>
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>calendar_today</span>
+            {formatDate(pet.created)}
+          </MetadataItem>
+          <MetadataItem>
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>photo_camera</span>
+            {fileSize}
+          </MetadataItem>
+        </Metadata>
       </Content>
     </>
   );
 
   if (link) {
     return (
-      <Link to={`/pets/${pet.id}`} style={{ textDecoration: 'none' }}>
+      <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none' }}>
         <Card onClick={handleCardClick}>
           {cardContent}
         </Card>
