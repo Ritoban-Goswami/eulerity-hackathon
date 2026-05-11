@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
-import { usePetData } from '../hooks/usePetData';
 import { useSelection } from '../contexts/SelectionContext';
 import { GalleryGrid } from '../components/GalleryGrid';
 import { SearchBar } from '../components/SearchBar';
@@ -75,16 +74,7 @@ const Controls = styled.div`
 
 
 const Home: React.FC = () => {
-  const { pets, loading, error, refetch } = usePetData();
-  const {
-    selectedIds,
-    selectedPets,
-    selectedCount,
-    totalFileSize,
-    toggleSelection,
-    selectAll,
-    clearSelection
-  } = useSelection();
+  const { pets, loading, error, refetch, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, selectAll, clearSelection } = useSelection();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('name-asc');
   const [isDownloading, setIsDownloading] = useState(false);

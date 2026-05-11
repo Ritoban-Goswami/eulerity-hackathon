@@ -4,7 +4,6 @@ export interface Pet {
   title: string;
   description: string;
   created: string;
-  fileSize?: number;
 }
 
 export type SortOption =
