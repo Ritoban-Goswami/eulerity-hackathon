@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { usePetData } from '../hooks/usePetData';
 import { useSelection } from '../contexts/SelectionContext';
 import { PetCard } from '../components/PetCard';
 
@@ -159,8 +158,7 @@ const formatDate = (dateString: string) => {
 
 const PetDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { pets, loading } = usePetData();
-  const { selectedIds, toggleSelection } = useSelection();
+  const { pets, loading, selectedIds, toggleSelection } = useSelection();
 
   const pet = useMemo(() => {
     return pets.find(p => p.id === id);

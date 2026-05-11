@@ -52,6 +52,16 @@ const FileSize = styled.span`
   color: #666;
 `;
 
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B';
+
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${(bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
+};
+
 const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
   padding: 8px 16px;
   font-size: 14px;
@@ -98,16 +108,6 @@ const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
     transition: none;
   }
 `;
-
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 KB';
-
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
-};
 
 export const SelectionControls: React.FC<SelectionControlsProps> = ({
   selectedCount,
