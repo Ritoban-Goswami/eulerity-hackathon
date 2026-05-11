@@ -37,6 +37,16 @@ export const usePetData = (): UsePetDataReturn => {
       const petsWithIds = data.map((pet, index) => ({
         ...pet,
         id: pet.title.toLowerCase().replace(/\s+/g, "-") + "-" + index,
+        // Use smaller image size for gallery (4/5 aspect ratio to match cards)
+        url: pet.url.replace(
+          "format=tiny",
+          "auto=compress&cs=tinysrgb&w=400&h=500&fit=crop",
+        ),
+        // Store original high-quality URL for detail page (4/3 aspect ratio)
+        originalUrl: pet.url.replace(
+          "format=tiny",
+          "auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop",
+        ),
       }));
 
       setPets(petsWithIds);
