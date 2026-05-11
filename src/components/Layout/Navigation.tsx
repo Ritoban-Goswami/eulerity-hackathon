@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   colors,
@@ -16,6 +17,7 @@ import { UserProfile } from '../UserProfile';
 interface NavigationProps {
   children: React.ReactNode;
   onFilterChange?: (filters: FilterState) => void;
+  onSearchChange?: (query: string) => void;
 }
 
 // Header Styles
@@ -125,8 +127,11 @@ const SearchIcon = styled.span`
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: ${colors.outline};
+  color: ${colors.onSurfaceVariant};
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const SearchInput = styled.input`
@@ -137,11 +142,20 @@ const SearchInput = styled.input`
   border-radius: ${borderRadius.full};
   font-size: ${typography.body.medium.fontSize};
   font-family: ${typography.body.medium.fontFamily};
+  color: ${colors.onSurface};
   transition: ${transitions.default};
+  
+  &::placeholder {
+    color: ${colors.onSurfaceVariant};
+  }
   
   &:focus {
     outline: none;
     ring: 2px solid ${colors.primary};
+  }
+  
+  &:hover {
+    background: ${colors.surfaceContainerHigh};
   }
 `;
 
@@ -166,6 +180,11 @@ const IconButton = styled.button`
   
   &:hover {
     background: ${colors.surfaceContainerHigh};
+    color: ${colors.onSurface};
+  }
+  
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
@@ -328,14 +347,16 @@ const MobileNavLabel = styled.span`
   font-family: ${typography.label.small.fontFamily};
 `;
 
-export const Navigation: React.FC<NavigationProps> = ({ children, onFilterChange }) => {
+export const Navigation: React.FC<NavigationProps> = ({ children, onFilterChange, onSearchChange }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     petType: [],
     dateRange: 'all',
     hasSelection: false,
   });
+  const searchTimeoutRef = useRef<number>();
 
   const handleFilterClick = () => {
     setIsFilterOpen(true);
@@ -345,6 +366,34 @@ export const Navigation: React.FC<NavigationProps> = ({ children, onFilterChange
     setFilters(newFilters);
     onFilterChange?.(newFilters);
   };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+
+    // Clear the previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set a new timeout to debounce the search
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearchQuery(query);
+    }, 300);
+  };
+
+  // Update the parent component when debounced query changes
+  useEffect(() => {
+    onSearchChange?.(debouncedSearchQuery);
+  }, [debouncedSearchQuery, onSearchChange]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <NavigationContainer>
@@ -364,7 +413,7 @@ export const Navigation: React.FC<NavigationProps> = ({ children, onFilterChange
               type="text"
               placeholder="Search gallery..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </SearchContainer>
 
@@ -392,17 +441,19 @@ export const Navigation: React.FC<NavigationProps> = ({ children, onFilterChange
       </Header>
 
       <Sidebar>
-        <Logo>
-          <LogoIcon>
-            <span className="material-symbols-outlined" style={{ color: colors.onPrimaryContainer, fontSize: '24px' }}>
-              pets
-            </span>
-          </LogoIcon>
-          <LogoTextContainer>
-            <LogoText>Pet Gallery</LogoText>
-            <LogoSubtitle>Premium Collection</LogoSubtitle>
-          </LogoTextContainer>
-        </Logo>
+        <Link to="/" style={{ textDecoration: 'none' }}>
+          <Logo>
+            <LogoIcon>
+              <span className="material-symbols-outlined" style={{ color: colors.onPrimaryContainer, fontSize: '24px' }}>
+                pets
+              </span>
+            </LogoIcon>
+            <LogoTextContainer>
+              <LogoText>Pet Gallery</LogoText>
+              <LogoSubtitle>Premium Collection</LogoSubtitle>
+            </LogoTextContainer>
+          </Logo>
+        </Link>
         <SidebarSection style={{ marginTop: spacing.lg }}>
           <SidebarLabel>Library</SidebarLabel>
           <SidebarLink href="#" active>

@@ -35,6 +35,8 @@ const ImageSection = styled.div`
 const MainImage = styled.img`
   width: 100%;
   height: auto;
+  aspect-ratio: 4/3;
+  object-fit: cover;
   border-radius: ${borderRadius.lg};
   box-shadow: ${elevation.level2};
 `;
@@ -248,11 +250,27 @@ const ViewAllLink = styled.a`
 
 const RelatedGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: ${spacing.md};
-  
-  @media (min-width: ${breakpoints.mobile}) {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  align-items: stretch;
+
+  /* Mobile: 1 column */
+  grid-template-columns: 1fr;
+
+  /* Tablet: 2 columns */
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: ${spacing.md};
+  }
+
+  /* Desktop: 3 columns */
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: ${spacing.md};
+  }
+
+  /* Large desktop: 4 columns */
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(4, 1fr);
   }
 `;
 
@@ -358,7 +376,7 @@ const PetDetail: React.FC = () => {
     <Navigation>
       <PetDetailContainer>
         <ImageSection>
-          <MainImage src={pet.url} alt={pet.title} />
+          <MainImage src={pet.originalUrl || pet.url} alt={pet.title} />
           <MobileActionButtons>
             <ActionButton variant="primary" onClick={handleDownload} style={{ flex: 1 }}>
               <span className="material-symbols-outlined">download</span>

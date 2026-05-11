@@ -2,8 +2,10 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import styled from 'styled-components';
 import { useSelection } from '../contexts/SelectionContext';
 import { GalleryGrid } from '../components/GalleryGrid';
+import { GalleryList } from '../components/GalleryList';
 import { SelectionControls } from '../components/SelectionControls';
 import { Navigation } from '../components/Layout/Navigation';
+import { SearchResults } from '../components/SearchResults';
 import { filterPets, sortPets } from '../utils/filterAndSort';
 import { downloadSelectedImages } from '../utils/download';
 import { colors, typography, spacing, borderRadius } from '../theme';
@@ -90,6 +92,7 @@ const LoadMoreTrigger = styled.div`
   justify-content: center;
   align-items: center;
   padding: 20px;
+  margin-top: 20px;
 `;
 
 const LoadingSpinner = styled.div`
@@ -112,6 +115,9 @@ const Home: React.FC = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(12);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filters, setFilters] = useState<FilterState>({
     petType: [],
     dateRange: 'all',
@@ -121,7 +127,7 @@ const Home: React.FC = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const filteredAndSortedPets = useMemo(() => {
-    let filtered = filterPets(pets, '');
+    let filtered = filterPets(pets, debouncedSearchQuery);
 
     // Apply additional filters
     if (filters.petType.length > 0) {
@@ -140,13 +146,22 @@ const Home: React.FC = () => {
 
     const sorted = sortPets(filtered, sortOption);
     return sorted;
-  }, [pets, sortOption, filters, selectedIds]);
+  }, [pets, debouncedSearchQuery, sortOption, filters, selectedIds]);
 
   const displayedPets = useMemo(() => {
     return filteredAndSortedPets.slice(0, displayedCount);
   }, [filteredAndSortedPets, displayedCount]);
 
   const hasMore = displayedCount < filteredAndSortedPets.length;
+
+  // Debounce search query to prevent excessive filtering
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   // Reset displayed count when filters change
   useEffect(() => {
@@ -165,7 +180,7 @@ const Home: React.FC = () => {
     setTimeout(() => {
       setDisplayedCount(prev => Math.min(prev + PETS_PER_PAGE, filteredAndSortedPets.length));
       setIsLoadingMore(false);
-    }, 100);
+    }, 2000);
   }, [hasMore, isLoadingMore, filteredAndSortedPets.length]);
 
   // Intersection Observer for infinite scroll
@@ -220,33 +235,71 @@ const Home: React.FC = () => {
 
   // Always render the full layout, GalleryGrid will handle loading/error states
 
-  return (
-    <Navigation onFilterChange={handleFilterChange}>
-      <PageHeader>
-        <TitleSection>
-          <Title>Premium Gallery</Title>
-          <Subtitle>
-            Explore your curated collection of high-resolution pet memories, organized by beauty and breed.
-          </Subtitle>
-        </TitleSection>
-        <SortContainer>
-          <SortLabel>Sort by:</SortLabel>
-          <SortSelect value={sortOption} onChange={(e) => setSortOption(e.target.value as SortOption)}>
-            <option value="name-asc">Alphabetical</option>
-            <option value="date-desc">Recent</option>
-            <option value="type">Type</option>
-          </SortSelect>
-        </SortContainer>
-      </PageHeader>
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+  };
 
-      <GalleryGrid
-        pets={displayedPets}
-        selectedIds={selectedIds}
-        onToggleSelection={toggleSelection}
-        loading={loading}
-        error={error}
-        onRetry={refetch}
-      />
+  const content = (
+    <>
+      {!searchQuery && (
+        <PageHeader>
+          <TitleSection>
+            <Title>Premium Gallery</Title>
+            <Subtitle>
+              Explore your curated collection of high-resolution pet memories, organized by beauty and breed.
+            </Subtitle>
+          </TitleSection>
+          <SortContainer>
+            <SortLabel>Sort by:</SortLabel>
+            <SortSelect value={sortOption} onChange={(e) => setSortOption(e.target.value as SortOption)}>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+              <option value="date-newest">Newest</option>
+              <option value="date-oldest">Oldest</option>
+            </SortSelect>
+          </SortContainer>
+        </PageHeader>
+      )}
+
+      {searchQuery ? (
+        <SearchResults
+          query={searchQuery}
+          totalResults={filteredAndSortedPets.length}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onExport={handleDownload}
+          onShare={() => console.log('Share clicked')}
+        >
+          {viewMode === 'grid' ? (
+            <GalleryGrid
+              pets={displayedPets}
+              selectedIds={selectedIds}
+              onToggleSelection={toggleSelection}
+              loading={loading}
+              error={error}
+              onRetry={refetch}
+            />
+          ) : (
+            <GalleryList
+              pets={displayedPets}
+              selectedIds={selectedIds}
+              onToggleSelection={toggleSelection}
+              loading={loading}
+              error={error}
+              onRetry={refetch}
+            />
+          )}
+        </SearchResults>
+      ) : (
+        <GalleryGrid
+          pets={displayedPets}
+          selectedIds={selectedIds}
+          onToggleSelection={toggleSelection}
+          loading={loading}
+          error={error}
+          onRetry={refetch}
+        />
+      )}
 
       {hasMore && (
         <LoadMoreTrigger ref={loadMoreRef}>
@@ -264,6 +317,15 @@ const Home: React.FC = () => {
         allSelected={selectedCount === filteredAndSortedPets.length && filteredAndSortedPets.length > 0}
         isDownloading={isDownloading}
       />
+    </>
+  );
+
+  return (
+    <Navigation
+      onFilterChange={handleFilterChange}
+      onSearchChange={handleSearchChange}
+    >
+      {content}
     </Navigation>
   );
 };

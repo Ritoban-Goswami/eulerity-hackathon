@@ -11,7 +11,7 @@ interface PetCardProps {
   link?: boolean;
 }
 
-const Card = styled.article`
+const Card = styled.article<{ $isSelected?: boolean }>`
   position: relative;
   background: ${colors.surfaceContainerLowest};
   border-radius: ${borderRadius.lg};
@@ -19,6 +19,15 @@ const Card = styled.article`
   box-shadow: ${elevation.level1};
   transition: ${transitions.hover};
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 2px solid transparent;
+
+  ${props => props.$isSelected && `
+    border-color: ${colors.primary};
+    box-shadow: 0 0 0 4px ${colors.primary}20;
+  `}
 
   &:hover {
     transform: translateY(-4px);
@@ -26,13 +35,12 @@ const Card = styled.article`
   }
 
   &:focus-within {
-    outline: 2px solid ${colors.primary};
-    outline-offset: 2px;
+    outline: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
     transition: none;
-    
+
     &:hover {
       transform: none;
     }
@@ -60,14 +68,33 @@ const Checkbox = styled.input`
   position: absolute;
   top: ${spacing.sm};
   right: ${spacing.sm};
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   cursor: pointer;
   z-index: 10;
-  border-radius: ${borderRadius.DEFAULT};
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: rgba(0, 0, 0, 0.2);
+  border-radius: ${borderRadius.full};
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.3);
   transition: ${transitions.default};
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:checked {
+    background: ${colors.primary};
+    border-color: ${colors.primary};
+  }
+
+  &:checked::after {
+    content: '✓';
+    color: ${colors.onPrimary};
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   &:focus-visible {
     outline: 2px solid ${colors.primary};
@@ -185,13 +212,18 @@ const extractBreed = (title: string) => {
   return found || 'Unknown';
 };
 
-const formatFileSize = () => {
+const formatFileSize = (petId: string) => {
   // Mock file size - in real app, this would come from the data
+  // Use petId to generate consistent "random" size
   const sizes = ['20MP', '24MP', '42MP', '61MP'];
-  return sizes[Math.floor(Math.random() * sizes.length)];
+  const hash = petId.split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+  return sizes[Math.abs(hash) % sizes.length];
 };
 
-export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelection, link = false }) => {
+export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, onToggleSelection, link = false }) => {
   const handleCardClick = (e: React.MouseEvent) => {
     if (e.target !== e.currentTarget && !(e.target as HTMLElement).classList.contains('card-content')) {
       return;
@@ -208,12 +240,19 @@ export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelec
   };
 
   const breed = extractBreed(pet.title);
-  const fileSize = formatFileSize();
+  const fileSize = formatFileSize(pet.id);
 
   const cardContent = (
     <>
       <ImageContainer>
-        <Image src={pet.url} alt={pet.description} loading="lazy" />
+        <Image
+          src={pet.url}
+          alt={pet.description}
+          loading="lazy"
+          decoding="async"
+          width="400"
+          height="300"
+        />
         <Checkbox
           type="checkbox"
           checked={isSelected}
@@ -255,7 +294,7 @@ export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelec
   if (link) {
     return (
       <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none' }}>
-        <Card onClick={handleCardClick}>
+        <Card onClick={handleCardClick} $isSelected={isSelected}>
           {cardContent}
         </Card>
       </Link>
@@ -263,8 +302,8 @@ export const PetCard: React.FC<PetCardProps> = ({ pet, isSelected, onToggleSelec
   }
 
   return (
-    <Card onClick={handleCardClick}>
+    <Card onClick={handleCardClick} $isSelected={isSelected}>
       {cardContent}
     </Card>
   );
-};
+});

@@ -21,6 +21,8 @@ const Container = styled.div<{ isVisible: boolean }>`
   z-index: ${zIndex.sticky};
   padding: ${spacing.md};
   pointer-events: none;
+  display: flex;
+  justify-content: center;
   
   @media (min-width: 768px) {
     padding: ${spacing.gutter};
@@ -47,14 +49,12 @@ const Pill = styled.div`
   background: ${colors.inverseSurface};
   color: ${colors.inverseOnSurface};
   border-radius: ${borderRadius.full};
-  padding: ${spacing.md} ${spacing.xl};
+  padding: ${spacing.md} ${spacing.md};
   box-shadow: ${elevation.level3};
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: ${spacing.lg};
   border: 1px solid ${colors.outlineVariant}20;
-  max-width: ${spacing.containerMax};
-  margin: 0 auto;
 `;
 
 const SelectionInfo = styled.div`

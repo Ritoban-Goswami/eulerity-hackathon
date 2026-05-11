@@ -18,22 +18,23 @@ interface GalleryGridProps {
 const Grid = styled.div`
   display: grid;
   gap: ${spacing.md};
-  
+  align-items: stretch;
+
   /* Mobile: 1 column */
   grid-template-columns: 1fr;
-  
+
   /* Tablet: 2 columns */
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
     gap: ${spacing.md};
   }
-  
+
   /* Desktop: 3 columns */
   @media (min-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
     gap: ${spacing.md};
   }
-  
+
   /* Large desktop: 4 columns */
   @media (min-width: 1280px) {
     grid-template-columns: repeat(4, 1fr);
@@ -81,7 +82,7 @@ const RetryButton = styled.button`
   }
 `;
 
-export const GalleryGrid: React.FC<GalleryGridProps> = ({
+export const GalleryGrid: React.FC<GalleryGridProps> = React.memo(({
   pets,
   selectedIds,
   onToggleSelection,
@@ -134,4 +135,4 @@ export const GalleryGrid: React.FC<GalleryGridProps> = ({
       ))}
     </Grid>
   );
-};
+});

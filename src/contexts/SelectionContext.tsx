@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState, useMemo, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Pet, SelectionState } from '../types/pet';
 import { usePetData } from '../hooks/usePetData';
@@ -99,28 +99,34 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
 
   const [state, dispatch] = useReducer(selectionReducer, undefined, initializeState);
 
-  // Save to localStorage whenever selection changes
+  // Debounced localStorage save to avoid frequent writes
   useEffect(() => {
-    localStorage.setItem('selectedPetIds', JSON.stringify(Array.from(state.selectedIds)));
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem('selectedPetIds', JSON.stringify(Array.from(state.selectedIds)));
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
   }, [state.selectedIds]);
 
   // Maintain a separate map for file sizes to avoid mutating pet objects
   const [fileSizeMap, setFileSizeMap] = useState<Map<string, number>>(new Map());
 
-  // Fetch file sizes for pets that don't have them
+  // Only fetch file sizes for selected pets to avoid excessive network requests
   useEffect(() => {
-    const petsWithoutSize = pets.filter(pet => !fileSizeMap.has(pet.id));
-    if (petsWithoutSize.length === 0) return;
+    const selectedPetsWithoutSize = pets.filter(pet =>
+      state.selectedIds.has(pet.id) && !fileSizeMap.has(pet.id)
+    );
+    if (selectedPetsWithoutSize.length === 0) return;
 
     const fetchSizes = async () => {
       const { fetchFileSizes } = await import('../utils/fileSize');
-      const urls = petsWithoutSize.map(pet => pet.url);
+      const urls = selectedPetsWithoutSize.map(pet => pet.url);
       const sizes = await fetchFileSizes(urls);
 
       // Update file size map
       setFileSizeMap(prevMap => {
         const newFileSizeMap = new Map(prevMap);
-        petsWithoutSize.forEach((pet, index) => {
+        selectedPetsWithoutSize.forEach((pet, index) => {
           newFileSizeMap.set(pet.id, sizes[index]);
         });
         return newFileSizeMap;
@@ -128,50 +134,51 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
     };
 
     fetchSizes();
-  }, [pets, fileSizeMap]);
+  }, [state.selectedIds, pets]);
 
   // Recalculate total file size when selection or file sizes change
   useEffect(() => {
-    if (pets.length === 0) return;
+    if (pets.length === 0 || fileSizeMap.size === 0) return;
 
-    const totalFileSize = Array.from(state.selectedIds)
-      .reduce((sum, id) => {
-        const size = fileSizeMap.get(id) || 0;
-        return sum + size;
-      }, 0);
+    let totalFileSize = 0;
+    for (const id of state.selectedIds) {
+      totalFileSize += fileSizeMap.get(id) || 0;
+    }
 
     if (totalFileSize !== state.totalFileSize) {
       dispatch({ type: 'UPDATE_FILE_SIZE', payload: totalFileSize });
     }
-  }, [pets, state.selectedIds, fileSizeMap]);
+  }, [state.selectedIds, fileSizeMap, state.totalFileSize]);
 
-  const selectPet = (pet: Pet) => {
+  const selectedPets = useMemo(() => {
+    return pets.filter(pet => state.selectedIds.has(pet.id));
+  }, [pets, state.selectedIds]);
+
+  const selectPet = useCallback((pet: Pet) => {
     dispatch({ type: 'SELECT_PET', payload: pet });
-  };
+  }, []);
 
-  const deselectPet = (petId: string) => {
+  const deselectPet = useCallback((petId: string) => {
     dispatch({ type: 'DESELECT_PET', payload: petId });
-  };
+  }, []);
 
-  const toggleSelection = (pet: Pet) => {
+  const toggleSelection = useCallback((pet: Pet) => {
     dispatch({ type: 'TOGGLE_SELECTION', payload: pet });
-  };
+  }, []);
 
-  const selectAll = (pets: Pet[]) => {
+  const selectAll = useCallback((pets: Pet[]) => {
     dispatch({ type: 'SELECT_ALL', payload: pets });
-  };
+  }, []);
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     dispatch({ type: 'CLEAR_SELECTION' });
-  };
+  }, []);
 
-  const isPetSelected = (petId: string) => {
+  const isPetSelected = useCallback((petId: string) => {
     return state.selectedIds.has(petId);
-  };
+  }, [state.selectedIds]);
 
-  const selectedPets = pets.filter(pet => state.selectedIds.has(pet.id));
-
-  const value: SelectionContextType = {
+  const value: SelectionContextType = useMemo(() => ({
     pets,
     loading,
     error,
@@ -187,7 +194,22 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
     selectAll,
     clearSelection,
     isPetSelected,
-  };
+  }), [
+    pets,
+    loading,
+    error,
+    isEmpty,
+    refetch,
+    state.selectedIds,
+    state.totalFileSize,
+    selectedPets,
+    selectPet,
+    deselectPet,
+    toggleSelection,
+    selectAll,
+    clearSelection,
+    isPetSelected,
+  ]);
 
   return (
     <SelectionContext.Provider value={value}>
