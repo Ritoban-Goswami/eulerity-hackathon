@@ -1,10 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { colors, typography, spacing, borderRadius, elevation, transitions, breakpoints, gradients } from '../theme';
 import { Navigation } from '../components/Layout/Navigation';
 import { PetCard } from '../components/PetCard';
+import { FavoriteButton } from '../components/FavoriteButton';
+import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { useSelection } from '../contexts/SelectionContext';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { downloadImage } from '../utils/download';
 
 // Styled Components
 const PetDetailContainer = styled.div`
@@ -170,7 +174,9 @@ const MobileActionButtons = styled.div`
   }
 `;
 
-const ActionButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
+const ActionButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'variant',
+}) <{ variant?: 'primary' | 'secondary' }>`
   padding: ${spacing.sm} ${spacing.md};
   border-radius: ${borderRadius.lg};
   border: none;
@@ -300,7 +306,8 @@ const PetDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { pets, loading, selectedIds, toggleSelection } = useSelection();
-  const [isFavorited, setIsFavorited] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const pet = useMemo(() => {
     const foundPet = pets.find(p => p.id === id);
@@ -315,17 +322,29 @@ const PetDetail: React.FC = () => {
     return shuffled.slice(0, 4);
   }, [pet, pets]);
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = pet?.url || '';
-    link.download = `${pet?.title || 'pet'}-original.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    if (!pet) return;
+    const filename = `${pet.title.replace(/[^a-z0-9]/gi, "_")}.jpg`;
+    await downloadImage(pet.originalUrl || pet.url, filename);
   };
 
-  const handleFavorite = () => {
-    setIsFavorited(!isFavorited);
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleSearchSubmit = (query: string) => {
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
+
+  const handleFavorite = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    if (pet) {
+      toggleFavorite(pet.id);
+    }
   };
 
   const handleShare = async () => {
@@ -348,15 +367,17 @@ const PetDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <Navigation>
-        <div style={{ padding: spacing.xl }}>Loading...</div>
+      <Navigation searchValue={searchQuery} onSearchChange={handleSearchChange} onSearchSubmit={handleSearchSubmit}>
+        <div style={{ padding: spacing.xl }}>
+          <LoadingSkeleton variant="petDetail" />
+        </div>
       </Navigation>
     );
   }
 
   if (!pet) {
     return (
-      <Navigation>
+      <Navigation searchValue={searchQuery} onSearchChange={handleSearchChange} onSearchSubmit={handleSearchSubmit}>
         <div style={{ padding: spacing.xl }}>Pet not found</div>
       </Navigation>
     );
@@ -364,23 +385,50 @@ const PetDetail: React.FC = () => {
 
 
   return (
-    <Navigation>
+    <Navigation searchValue={searchQuery} onSearchChange={handleSearchChange} onSearchSubmit={handleSearchSubmit}>
       <PetDetailContainer>
         <ImageSection>
           <MainImage src={pet.originalUrl || pet.url} alt={pet.title} />
           <MobileActionButtons>
             <ActionButton variant="primary" onClick={handleDownload} style={{ flex: 1 }}>
-              <span className="material-symbols-outlined">download</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>download</span>
               Download
             </ActionButton>
-            <ActionButton variant="secondary" onClick={handleFavorite} style={{ flex: 1 }}>
-              <span className="material-symbols-outlined">
-                {isFavorited ? 'favorite' : 'favorite_border'}
-              </span>
+            <div
+              onClick={handleFavorite}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: spacing.xs,
+                padding: `${spacing.sm} ${spacing.md}`,
+                borderRadius: borderRadius.lg,
+                border: `2px solid ${colors.primary}`,
+                background: 'transparent',
+                color: colors.primary,
+                cursor: 'pointer',
+                transition: transitions.default,
+                fontWeight: 500,
+                fontSize: typography.label.medium.fontSize
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = `${colors.primary}10`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <FavoriteButton
+                isFavorite={isFavorite(pet.id)}
+                onClick={handleFavorite}
+                ariaLabel={isFavorite(pet.id) ? 'Remove from favorites' : 'Add to favorites'}
+                variant="inline"
+              />
               Favorite
-            </ActionButton>
+            </div>
             <ActionButton variant="secondary" onClick={handleShare} style={{ width: spacing.xl }}>
-              <span className="material-symbols-outlined">share</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>share</span>
             </ActionButton>
           </MobileActionButtons>
         </ImageSection>
@@ -427,18 +475,45 @@ const PetDetail: React.FC = () => {
 
           <ActionButtons>
             <ActionButton variant="primary" onClick={handleDownload}>
-              <span className="material-symbols-outlined">download</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>download</span>
               Download Original
             </ActionButton>
             <div style={{ display: 'flex', gap: spacing.sm }}>
-              <ActionButton variant="secondary" onClick={handleFavorite} style={{ flex: 1 }}>
-                <span className="material-symbols-outlined">
-                  {isFavorited ? 'favorite' : 'favorite_border'}
-                </span>
-                {isFavorited ? 'Favorited' : 'Favorite'}
-              </ActionButton>
+              <div
+                onClick={handleFavorite}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: spacing.xs,
+                  padding: `${spacing.sm} ${spacing.md}`,
+                  borderRadius: borderRadius.lg,
+                  border: `2px solid ${colors.primary}`,
+                  background: 'transparent',
+                  color: colors.primary,
+                  cursor: 'pointer',
+                  transition: transitions.default,
+                  fontWeight: 500,
+                  fontSize: typography.label.medium.fontSize
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = `${colors.primary}10`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                <FavoriteButton
+                  isFavorite={isFavorite(pet.id)}
+                  onClick={handleFavorite}
+                  ariaLabel={isFavorite(pet.id) ? 'Remove from favorites' : 'Add to favorites'}
+                  variant="inline"
+                />
+                {isFavorite(pet.id) ? 'Favorited' : 'Favorite'}
+              </div>
               <ActionButton variant="secondary" onClick={handleShare} style={{ flex: 1 }}>
-                <span className="material-symbols-outlined">share</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>share</span>
                 Share
               </ActionButton>
             </div>
