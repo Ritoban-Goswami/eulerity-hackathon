@@ -1,15 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  colors,
-  typography,
-  spacing,
-  borderRadius,
-  elevation,
-  transitions,
-  breakpoints
-} from '../theme';
+import { colors, typography, spacing, borderRadius, elevation, transitions, breakpoints, gradients } from '../theme';
 import { Navigation } from '../components/Layout/Navigation';
 import { PetCard } from '../components/PetCard';
 import { useSelection } from '../contexts/SelectionContext';
@@ -190,16 +182,17 @@ const ActionButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
   display: flex;
   align-items: center;
   gap: ${spacing.xs};
-  
-  background: ${props => props.variant === 'primary' ? colors.primary : colors.surfaceContainerHigh};
-  color: ${props => props.variant === 'primary' ? colors.onPrimary : colors.onSurface};
-  
+
+  background: ${props => props.variant === 'primary' ? gradients.primary : props.variant === 'secondary' ? 'transparent' : colors.surfaceContainerHigh};
+  color: ${props => props.variant === 'primary' ? colors.onPrimary : props.variant === 'secondary' ? colors.primary : colors.onSurface};
+  border: ${props => props.variant === 'secondary' ? `2px solid ${colors.primary}` : 'none'};
+
   &:hover {
-    background: ${props => props.variant === 'primary' ? colors.primary : colors.surfaceContainerHover};
+    background: ${props => props.variant === 'primary' ? gradients.primary : props.variant === 'secondary' ? `${colors.primary}10` : colors.surfaceContainerHover};
     transform: translateY(-1px);
     box-shadow: ${elevation.level1};
   }
-  
+
   &:active {
     transform: translateY(0);
   }
@@ -323,8 +316,6 @@ const PetDetail: React.FC = () => {
   }, [pet, pets]);
 
   const handleDownload = () => {
-    // Implement download functionality
-    console.log('Downloading original image...');
     const link = document.createElement('a');
     link.href = pet?.url || '';
     link.download = `${pet?.title || 'pet'}-original.jpg`;
@@ -346,7 +337,7 @@ const PetDetail: React.FC = () => {
           url: window.location.href
         });
       } catch (err) {
-        console.log('Error sharing:', err);
+        // Error sharing - fallback to clipboard copy
       }
     } else {
       // Fallback - copy to clipboard
@@ -388,7 +379,7 @@ const PetDetail: React.FC = () => {
               </span>
               Favorite
             </ActionButton>
-            <ActionButton variant="secondary" onClick={handleShare} style={{ width: '48px' }}>
+            <ActionButton variant="secondary" onClick={handleShare} style={{ width: spacing.xl }}>
               <span className="material-symbols-outlined">share</span>
             </ActionButton>
           </MobileActionButtons>
@@ -398,9 +389,9 @@ const PetDetail: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
             <BreadcrumbNav>
               <BreadcrumbLink href="#" onClick={(e) => { e.preventDefault(); navigate('/'); }}>Gallery</BreadcrumbLink>
-              <BreadcrumbSeparator className="material-symbols-outlined" style={{ fontSize: '14px' }}>chevron_right</BreadcrumbSeparator>
+              <BreadcrumbSeparator className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>chevron_right</BreadcrumbSeparator>
               <BreadcrumbLink href="#" onClick={(e) => { e.preventDefault(); }}>{pet.type}s</BreadcrumbLink>
-              <BreadcrumbSeparator className="material-symbols-outlined" style={{ fontSize: '14px' }}>chevron_right</BreadcrumbSeparator>
+              <BreadcrumbSeparator className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>chevron_right</BreadcrumbSeparator>
               <BreadcrumbCurrent>{pet.breed}</BreadcrumbCurrent>
             </BreadcrumbNav>
             <PetName>{pet.title}</PetName>

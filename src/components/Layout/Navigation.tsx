@@ -6,10 +6,13 @@ import {
   typography,
   spacing,
   borderRadius,
-  elevation,
   transitions,
   zIndex,
-  breakpoints
+  breakpoints,
+  glass,
+  gradients,
+  patterns,
+  elevation
 } from '../../theme';
 import { FilterModal, type FilterState } from '../FilterModal';
 import { UserProfile } from '../UserProfile';
@@ -27,11 +30,12 @@ const Header = styled.header`
   left: 256px;
   right: 0;
   z-index: ${zIndex.sticky};
-  background: ${colors.surface}90;
-  backdrop-filter: blur(12px);
-  box-shadow: ${elevation.level1};
-  height: 64px;
-  
+  background: ${glass.panel};
+  backdrop-filter: blur(${glass.blur});
+  -webkit-backdrop-filter: blur(${glass.blur});
+  border-bottom: 1px solid ${colors.surfaceContainerHigh};
+  height: 80px;
+
   @media (max-width: ${breakpoints.tablet}) {
     left: 0;
   }
@@ -64,8 +68,9 @@ const LogoIcon = styled.div`
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: ${colors.primaryContainer};
-  border-radius: ${borderRadius.md};
+  background: ${gradients.primary};
+  border-radius: ${borderRadius.lg};
+  box-shadow: ${elevation.level1};
 `;
 
 const LogoTextContainer = styled.div`
@@ -236,24 +241,24 @@ const SidebarLink = styled.a<{ active?: boolean }>`
   gap: ${spacing.sm};
   padding: ${spacing.sm};
   border-radius: ${borderRadius.lg};
-  font-weight: ${props => props.active ? '600' : '400'};
-  color: ${props => props.active ? colors.onPrimaryContainer : colors.onSurfaceVariant};
-  background: ${props => props.active ? colors.primaryContainer : 'none'};
+  font-weight: ${props => props.active ? '700' : '600'};
+  color: ${props => props.active ? colors.onPrimary : colors.onSurfaceVariant};
+  background: ${props => props.active ? gradients.primary : 'none'};
   transition: ${transitions.default};
-  
+
   &:hover {
-    background: ${props => props.active ? colors.primaryContainer : `${colors.surfaceVariant}50`};
+    background: ${props => props.active ? gradients.primary : `${colors.surfaceVariant}50`};
     transform: translateX(4px);
   }
 `;
 
 const UploadButton = styled.button`
-  background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryContainer} 100%);
-  color: ${colors.onPrimary};
+  background: ${gradients.secondary};
+  color: ${colors.onSecondary};
   width: 100%;
-  padding: 12px;
-  border-radius: ${borderRadius.lg};
-  font-weight: 700;
+  padding: 16px;
+  border-radius: ${borderRadius.xl};
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,11 +267,12 @@ const UploadButton = styled.button`
   border: none;
   cursor: pointer;
   transition: ${transitions.default};
-  
+
   &:hover {
-    transform: scale(0.95);
+    transform: translateY(-2px);
+    box-shadow: ${elevation.level2};
   }
-  
+
   &:active {
     transform: scale(0.95);
   }
@@ -283,22 +289,24 @@ const Main = styled.main`
   flex: 1;
   width: 100%;
   padding: ${spacing.marginMobile};
-  padding-top: calc(64px + ${spacing.marginMobile});
+  padding-top: calc(80px + ${spacing.marginMobile});
   padding-bottom: ${spacing.xl};
   background: ${colors.surface};
+  background-image: ${patterns.dotGrid};
+  background-size: 24px 24px;
   margin-left: 0;
-  
+
   @media (min-width: ${breakpoints.mobile}) {
     padding: 0 ${spacing.gutter};
-    padding-top: calc(64px + ${spacing.gutter});
+    padding-top: calc(80px + ${spacing.gutter});
     padding-bottom: ${spacing.xl};
     max-width: ${spacing.containerMax};
     margin: 0 auto;
   }
-  
+
   @media (min-width: ${breakpoints.tablet}) {
     padding: 0 ${spacing.xl};
-    padding-top: calc(64px + ${spacing.xl});
+    padding-top: calc(80px + ${spacing.xl});
     padding-bottom: ${spacing.xl};
     margin-left: 256px;
     max-width: none;
@@ -313,15 +321,16 @@ const MobileNav = styled.nav`
   left: 0;
   right: 0;
   z-index: ${zIndex.sticky};
-  background: ${colors.surface};
-  border-radius: ${borderRadius.lg} ${borderRadius.lg} 0 0;
-  box-shadow: ${elevation.level2};
+  background: ${glass.panel};
+  backdrop-filter: blur(${glass.blur});
+  -webkit-backdrop-filter: blur(${glass.blur});
   border-top: 1px solid ${colors.outlineVariant}20;
   justify-content: space-around;
   align-items: center;
   padding: 8px 16px;
   padding-bottom: max(8px, env(safe-area-inset-bottom));
-  
+  box-shadow: ${elevation.level1};
+
   @media (min-width: ${breakpoints.tablet}) {
     display: none;
   }
@@ -356,7 +365,7 @@ export const Navigation: React.FC<NavigationProps> = ({ children, onFilterChange
     dateRange: 'all',
     hasSelection: false,
   });
-  const searchTimeoutRef = useRef<number>();
+  const searchTimeoutRef = useRef<number | undefined>(undefined);
 
   const handleFilterClick = () => {
     setIsFilterOpen(true);
@@ -434,17 +443,17 @@ export const Navigation: React.FC<NavigationProps> = ({ children, onFilterChange
             </IconButton>
             <UserProfile
               userName="Pet Lover"
-              onSignOut={() => console.log('Sign out clicked')}
+              onSignOut={() => { }}
             />
           </HeaderActions>
         </HeaderContent>
       </Header>
 
       <Sidebar>
-        <Link to="/" style={{ textDecoration: 'none' }}>
+        <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
           <Logo>
             <LogoIcon>
-              <span className="material-symbols-outlined" style={{ color: colors.onPrimaryContainer, fontSize: '24px' }}>
+              <span className="material-symbols-outlined" style={{ color: colors.onPrimaryContainer, fontSize: typography.headline.medium.fontSize }}>
                 pets
               </span>
             </LogoIcon>

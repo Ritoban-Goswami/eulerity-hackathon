@@ -1,39 +1,39 @@
 // Design System Constants for Pet Gallery
-// Based on DESIGN.md specifications
+// Based on DESIGN.md specifications - High-Tech Sanctuary aesthetic
 
 // Colors
 export const colors = {
-  // Primary (Teal)
-  primary: "#006066",
+  // Primary (Blue)
+  primary: "#0052d2",
   onPrimary: "#ffffff",
-  primaryContainer: "#147a81",
-  onPrimaryContainer: "#ccfbff",
-  primaryFixed: "#9bf0f8",
-  primaryFixedDim: "#7fd4db",
-  onPrimaryFixed: "#002022",
-  onPrimaryFixedVariant: "#004f54",
-  inversePrimary: "#7fd4db",
-  surfaceTint: "#00696f",
+  primaryContainer: "#206afb",
+  onPrimaryContainer: "#fefcff",
+  primaryFixed: "#dbe1ff",
+  primaryFixedDim: "#b3c5ff",
+  onPrimaryFixed: "#001849",
+  onPrimaryFixedVariant: "#003fa5",
+  inversePrimary: "#b3c5ff",
+  surfaceTint: "#0054d7",
 
-  // Secondary (Coral)
-  secondary: "#a43b2c",
+  // Secondary (Purple)
+  secondary: "#5f44c6",
   onSecondary: "#ffffff",
-  secondaryContainer: "#fd7d68",
-  onSecondaryContainer: "#71160b",
-  secondaryFixed: "#ffdad4",
-  secondaryFixedDim: "#ffb4a7",
-  onSecondaryFixed: "#400200",
-  onSecondaryFixedVariant: "#842417",
+  secondaryContainer: "#785fe1",
+  onSecondaryContainer: "#fffbff",
+  secondaryFixed: "#e6deff",
+  secondaryFixedDim: "#cabeff",
+  onSecondaryFixed: "#1c0062",
+  onSecondaryFixedVariant: "#492ab0",
 
-  // Tertiary (Slate)
-  tertiary: "#49576b",
+  // Tertiary (Green)
+  tertiary: "#006a44",
   onTertiary: "#ffffff",
-  tertiaryContainer: "#616f84",
-  onTertiaryContainer: "#ecf2ff",
-  tertiaryFixed: "#d5e3fc",
-  tertiaryFixedDim: "#b9c7df",
-  onTertiaryFixed: "#0d1c2e",
-  onTertiaryFixedVariant: "#3a485b",
+  tertiaryContainer: "#008557",
+  onTertiaryContainer: "#f6fff6",
+  tertiaryFixed: "#54feb3",
+  tertiaryFixedDim: "#28e199",
+  onTertiaryFixed: "#002112",
+  onTertiaryFixedVariant: "#005234",
 
   // Error
   error: "#ba1a1a",
@@ -42,90 +42,91 @@ export const colors = {
   onErrorContainer: "#93000a",
 
   // Surface
-  surface: "#f7fafa",
-  onSurface: "#181c1d",
-  surfaceVariant: "#e0e3e3",
-  onSurfaceVariant: "#3e494a",
-  surfaceDim: "#d7dbdb",
-  surfaceBright: "#f7fafa",
+  surface: "#faf8ff",
+  onSurface: "#081a3c",
+  surfaceVariant: "#d9e2ff",
+  onSurfaceVariant: "#424655",
+  surfaceDim: "#cdd9ff",
+  surfaceBright: "#faf8ff",
   surfaceContainerLowest: "#ffffff",
-  surfaceContainerLow: "#f1f4f4",
-  surfaceContainer: "#ebeeee",
-  surfaceContainerHigh: "#e5e9e9",
-  surfaceContainerHighest: "#e0e3e3",
-  surfaceContainerHover: "#e5e9e9",
-  background: "#f7fafa",
-  onBackground: "#181c1d",
-  outline: "#6e797a",
-  outlineVariant: "#bdc9c9",
+  surfaceContainerLow: "#f2f3ff",
+  surfaceContainer: "#e9edff",
+  surfaceContainerHigh: "#e1e8ff",
+  surfaceContainerHighest: "#d9e2ff",
+  surfaceContainerHover: "#e1e8ff",
+  background: "#faf8ff",
+  onBackground: "#081a3c",
+  outline: "#737687",
+  outlineVariant: "#c2c6d8",
 
   // Inverse
-  inverseSurface: "#2d3131",
-  inverseOnSurface: "#eef1f1",
+  inverseSurface: "#203052",
+  inverseOnSurface: "#edf0ff",
 } as const;
 
 // Typography
 export const typography = {
   display: {
     fontSize: "48px",
-    fontWeight: "700",
-    lineHeight: "1.1",
+    fontWeight: "800",
+    lineHeight: "1.17",
     letterSpacing: "-0.02em",
-    fontFamily: "Plus Jakarta Sans, sans-serif",
+    fontFamily: "Manrope, sans-serif",
   },
   headline: {
     large: {
       fontSize: "32px",
-      fontWeight: "600",
-      lineHeight: "1.2",
-      fontFamily: "Plus Jakarta Sans, sans-serif",
+      fontWeight: "700",
+      lineHeight: "1.25",
+      letterSpacing: "-0.01em",
+      fontFamily: "Manrope, sans-serif",
     },
     largeMobile: {
       fontSize: "28px",
-      fontWeight: "600",
-      lineHeight: "1.2",
-      fontFamily: "Plus Jakarta Sans, sans-serif",
+      fontWeight: "700",
+      lineHeight: "1.29",
+      fontFamily: "Manrope, sans-serif",
     },
     medium: {
       fontSize: "24px",
       fontWeight: "600",
-      lineHeight: "1.3",
-      fontFamily: "Plus Jakarta Sans, sans-serif",
+      lineHeight: "1.33",
+      fontFamily: "Manrope, sans-serif",
     },
   },
   body: {
     large: {
       fontSize: "18px",
       fontWeight: "400",
-      lineHeight: "1.6",
-      fontFamily: "Inter, sans-serif",
+      lineHeight: "1.56",
+      fontFamily: "Manrope, sans-serif",
     },
     medium: {
       fontSize: "16px",
       fontWeight: "400",
       lineHeight: "1.5",
-      fontFamily: "Inter, sans-serif",
+      fontFamily: "Manrope, sans-serif",
     },
     small: {
       fontSize: "14px",
       fontWeight: "400",
-      lineHeight: "1.4",
-      fontFamily: "Inter, sans-serif",
+      lineHeight: "1.43",
+      fontFamily: "Manrope, sans-serif",
     },
   },
   label: {
     medium: {
       fontSize: "14px",
-      fontWeight: "500",
-      lineHeight: "1.4",
-      letterSpacing: "0.01em",
-      fontFamily: "Inter, sans-serif",
+      fontWeight: "600",
+      lineHeight: "1.43",
+      letterSpacing: "0.05em",
+      fontFamily: "Manrope, sans-serif",
     },
     small: {
       fontSize: "12px",
-      fontWeight: "600",
-      lineHeight: "1.4",
-      fontFamily: "Inter, sans-serif",
+      fontWeight: "500",
+      lineHeight: "1.33",
+      fontFamily: "Manrope, sans-serif",
     },
   },
 } as const;
@@ -140,6 +141,8 @@ export const spacing = {
   xl: "80px",
   gutter: "24px",
   marginMobile: "16px",
+  marginDesktop: "40px",
+  sectionGap: "80px",
   containerMax: "1280px",
 } as const;
 
@@ -153,17 +156,32 @@ export const borderRadius = {
   full: "9999px",
 } as const;
 
-// Elevation (Shadows)
+// Elevation (Glassmorphism & Tonal Layering)
 export const elevation = {
   level0: "none",
-  level1: "0px 2px 8px rgba(71, 85, 105, 0.05)", // Standard cards and input fields
-  level2: "0px 10px 20px rgba(71, 85, 105, 0.1)", // Hover states and dropdown menus
-  level3: "0px 20px 40px rgba(71, 85, 105, 0.15)", // Modals and floating action buttons
+  level1:
+    "0 4px 24px -4px rgba(8, 26, 60, 0.04), 0 2px 8px -2px rgba(8, 26, 60, 0.02)", // Cards/Sections: subtle border + faint shadow
+  level2: "0 20px 48px -12px rgba(8, 26, 60, 0.12)", // Hover states
+  level3: "0 32px 64px -12px rgba(8, 26, 60, 0.5)", // Modals/overlays
 } as const;
 
 // Gradients
 export const gradients = {
-  tealGradient: "linear-gradient(135deg, #006066 0%, #147a81 100%)",
+  primary: "linear-gradient(135deg, #0052d2 0%, #206afb 100%)",
+  secondary: "linear-gradient(135deg, #5f44c6 0%, #785fe1 100%)",
+} as const;
+
+// Glassmorphism
+export const glass = {
+  panel: "rgba(255, 255, 255, 0.8)",
+  selection: "rgba(32, 48, 82, 0.9)",
+  blur: "12px",
+  blurHeavy: "16px",
+} as const;
+
+// Patterns
+export const patterns = {
+  dotGrid: "radial-gradient(#cdd9ff 1px, transparent 1px)",
 } as const;
 
 // Breakpoints
@@ -192,6 +210,6 @@ export const transitions = {
 
 // Aspect Ratios
 export const aspectRatios = {
-  petCard: "4/5",
+  petCard: "3/4",
   square: "1/1",
 } as const;

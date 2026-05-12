@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { colors, typography, spacing, borderRadius } from '../theme';
+import { colors, typography, spacing, borderRadius, elevation } from '../theme';
 
 interface SearchResultsProps {
   query: string;
@@ -63,7 +63,7 @@ const BulkActionBar = styled.div`
   padding: 8px;
   background: ${colors.surfaceContainerHigh};
   border-radius: ${borderRadius.lg};
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: ${elevation.level1};
   border: 1px solid ${colors.outlineVariant}20;
 `;
 
@@ -202,9 +202,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     onViewModeChange?.(mode);
   };
 
-  const handleRecentSearchClick = (term: string) => {
+  const handleRecentSearchClick = (_term: string) => {
     // This would typically update the search query
-    console.log('Search for:', term);
   };
 
   return (
@@ -220,11 +219,11 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             <ActionsLabel>Actions</ActionsLabel>
             <ActionDivider />
             <ActionButton variant="primary" onClick={onExport}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
+              <span className="material-symbols-outlined" style={{ fontSize: typography.label.medium.fontSize }}>download</span>
               Export
             </ActionButton>
             <ActionButton variant="secondary" onClick={onShare}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>share</span>
+              <span className="material-symbols-outlined" style={{ fontSize: typography.label.medium.fontSize }}>share</span>
               Share
             </ActionButton>
           </BulkActionBar>
@@ -239,7 +238,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 primary={search.primary}
                 onClick={() => handleRecentSearchClick(search.term)}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>history</span>
+                <span className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>history</span>
                 {search.term}
               </RecentSearchChip>
             ))}

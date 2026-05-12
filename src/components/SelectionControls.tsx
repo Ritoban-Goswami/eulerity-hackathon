@@ -1,15 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
-import { colors, typography, spacing, borderRadius, elevation, transitions, zIndex, gradients } from '../theme';
+import { colors, typography, spacing, borderRadius, transitions, glass, gradients, zIndex, elevation } from '../theme';
 
 interface SelectionControlsProps {
   selectedCount: number;
   totalFileSize: number;
-  onSelectAll: () => void;
   onClearSelection: () => void;
   onDownload: () => void;
-  hasPets: boolean;
-  allSelected: boolean;
   isDownloading?: boolean;
 }
 
@@ -46,10 +43,12 @@ const Container = styled.div<{ isVisible: boolean }>`
 
 const Pill = styled.div`
   pointer-events: auto;
-  background: ${colors.inverseSurface};
+  background: ${glass.selection};
+  backdrop-filter: blur(${glass.blurHeavy});
+  -webkit-backdrop-filter: blur(${glass.blurHeavy});
   color: ${colors.inverseOnSurface};
-  border-radius: ${borderRadius.full};
-  padding: ${spacing.md} ${spacing.md};
+  border-radius: ${borderRadius.xl};
+  padding: ${spacing.md} ${spacing.xl};
   box-shadow: ${elevation.level3};
   display: inline-flex;
   align-items: center;
@@ -69,7 +68,7 @@ const CountIndicator = styled.div`
   width: 32px;
   height: 32px;
   border-radius: ${borderRadius.full};
-  background: ${gradients.tealGradient};
+  background: ${gradients.primary};
   color: ${colors.onPrimary};
   display: flex;
   align-items: center;
@@ -93,11 +92,11 @@ const Actions = styled.div`
 `;
 
 const DownloadButton = styled.button`
-  background: ${colors.primaryFixed};
-  color: ${colors.onPrimaryFixed};
-  font-weight: 700;
-  padding: 8px 24px;
-  border-radius: ${borderRadius.full};
+  background: ${gradients.primary};
+  color: ${colors.onPrimary};
+  font-weight: 800;
+  padding: 12px 32px;
+  border-radius: ${borderRadius.xl};
   display: flex;
   align-items: center;
   gap: ${spacing.sm};
@@ -106,15 +105,17 @@ const DownloadButton = styled.button`
   transition: ${transitions.default};
   font-size: ${typography.label.medium.fontSize};
   font-family: ${typography.label.medium.fontFamily};
-  
+  box-shadow: ${elevation.level1};
+
   &:hover {
-    transform: scale(0.95);
+    transform: translateY(-2px);
+    box-shadow: ${elevation.level2};
   }
-  
+
   &:active {
     transform: scale(0.95);
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -157,12 +158,6 @@ export const SelectionControls: React.FC<SelectionControlsProps> = ({
   onClearSelection,
   onDownload,
   isDownloading = false,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onSelectAll,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  hasPets,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  allSelected,
 }) => {
   const isVisible = selectedCount > 0;
 
@@ -192,7 +187,7 @@ export const SelectionControls: React.FC<SelectionControlsProps> = ({
             onClick={onDownload}
             disabled={isDownloading}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>download</span>
+            <span className="material-symbols-outlined" style={{ fontSize: typography.label.medium.fontSize }}>download</span>
             Download Selected
           </DownloadButton>
 

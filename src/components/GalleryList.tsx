@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { LoadingSkeleton } from './LoadingSkeleton';
-import { colors, typography, spacing, borderRadius } from '../theme';
+import { colors, typography, spacing, borderRadius, elevation, transitions } from '../theme';
 import type { Pet } from '../types/pet';
 
 interface GalleryListProps {
@@ -25,13 +25,14 @@ const ListItem = styled.div`
   background: ${colors.surfaceContainerLowest};
   border-radius: ${borderRadius.lg};
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  box-shadow: ${elevation.level1};
+  transition: ${transitions.hover};
   cursor: pointer;
+  border: 1px solid ${colors.outlineVariant};
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: ${elevation.level2};
   }
 `;
 
@@ -253,15 +254,15 @@ export const GalleryList: React.FC<GalleryListProps> = React.memo(({
               <ListDescription>{pet.description}</ListDescription>
               <ListMetadata>
                 <MetadataItem>
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>pets</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>pets</span>
                   {breed}
                 </MetadataItem>
                 <MetadataItem>
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>calendar_today</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>calendar_today</span>
                   {formatDate(pet.created)}
                 </MetadataItem>
                 <MetadataItem>
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>photo_camera</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>photo_camera</span>
                   {fileSize}
                 </MetadataItem>
               </ListMetadata>

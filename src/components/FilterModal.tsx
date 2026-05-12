@@ -21,7 +21,7 @@ const Overlay = styled.div<{ isOpen: boolean }>`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: ${colors.inverseSurface}80;
   z-index: ${zIndex.modal};
   display: ${props => props.isOpen ? 'block' : 'none'};
   animation: ${props => props.isOpen ? 'fadeIn 0.2s ease-out' : 'none'};
