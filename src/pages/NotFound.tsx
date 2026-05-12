@@ -37,7 +37,7 @@ const ErrorCode = styled.h1`
   line-height: 1;
   
   @media (max-width: 768px) {
-    font-size: 80px;
+    font-size: ${typography.headline.large.fontSize};
   }
 `;
 
@@ -98,7 +98,7 @@ const NotFound: React.FC = () => {
         <ContentCard>
           <IconContainer>
             <span className="material-symbols-outlined" style={{
-              fontSize: '120px',
+              fontSize: typography.display.fontSize,
               color: colors.primary,
               opacity: 0.3
             }}>

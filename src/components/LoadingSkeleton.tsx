@@ -1,5 +1,6 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
+import { colors, elevation, spacing } from '../theme';
 
 const shimmer = keyframes`
   0% {
@@ -15,9 +16,9 @@ const SkeletonBase = styled.div<{ width?: string; height?: string }>`
   height: ${props => props.height || '20px'};
   background: linear-gradient(
     90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
+    ${colors.surfaceContainer} 25%,
+    ${colors.surfaceContainerHigh} 50%,
+    ${colors.surfaceContainer} 75%
   );
   background-size: 1000px 100%;
   animation: ${shimmer} 2s infinite;
@@ -28,7 +29,7 @@ const CardSkeleton = styled.div`
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: ${elevation.level1};
 `;
 
 const ImageSkeleton = styled(SkeletonBase)`
@@ -48,7 +49,7 @@ const ListSkeleton = styled.div`
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: ${elevation.level1};
 `;
 
 const ListImageSkeleton = styled(SkeletonBase)`
@@ -127,7 +128,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
               </ListHeaderSkeleton>
               <SkeletonBase width="100%" height="16px" />
               <SkeletonBase width="100%" height="16px" />
-              <div style={{ display: 'flex', gap: '20px', marginTop: 'auto' }}>
+              <div style={{ display: 'flex', gap: spacing.md, marginTop: 'auto' }}>
                 <SkeletonBase width="80px" height="14px" />
                 <SkeletonBase width="80px" height="14px" />
                 <SkeletonBase width="60px" height="14px" />

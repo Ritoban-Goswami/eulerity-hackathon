@@ -22,7 +22,7 @@ const Card = styled.article<{ $isSelected?: boolean }>`
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 2px solid transparent;
+  border: 1px solid ${colors.outlineVariant};
 
   ${props => props.$isSelected && `
     border-color: ${colors.primary};
@@ -73,8 +73,8 @@ const Checkbox = styled.input`
   cursor: pointer;
   z-index: 10;
   border-radius: ${borderRadius.full};
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid ${colors.surfaceContainerLowest}80;
+  background: ${colors.inverseSurface}4D;
   transition: ${transitions.default};
   appearance: none;
   display: flex;
@@ -109,7 +109,7 @@ const Checkbox = styled.input`
 const Overlay = styled.div`
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent, transparent);
+  background: linear-gradient(to top, ${colors.inverseSurface}99, transparent, transparent);
   opacity: 0;
   transition: ${transitions.fadeIn};
   display: flex;
@@ -140,7 +140,7 @@ const QuickViewButton = styled.button`
 `;
 
 const Content = styled.div`
-  padding: ${spacing.md};
+  padding: ${spacing.sm};
 `;
 
 const Header = styled.div`
@@ -170,11 +170,11 @@ const BreedBadge = styled.span`
 `;
 
 const Description = styled.p`
-  font-size: ${typography.body.medium.fontSize};
-  font-weight: ${typography.body.medium.fontWeight};
-  font-family: ${typography.body.medium.fontFamily};
+  font-size: ${typography.body.small.fontSize};
+  font-weight: ${typography.body.small.fontWeight};
+  font-family: ${typography.body.small.fontFamily};
   color: ${colors.onSurfaceVariant};
-  line-height: ${typography.body.medium.lineHeight};
+  line-height: ${typography.body.small.lineHeight};
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -236,7 +236,6 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
   const handleQuickView = (e: React.MouseEvent) => {
     e.stopPropagation();
     // TODO: Implement quick view modal
-    console.log('Quick view:', pet.id);
   };
 
   const breed = extractBreed(pet.title);
@@ -266,7 +265,7 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
         />
         <Overlay>
           <QuickViewButton onClick={handleQuickView}>
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>visibility</span>
+            <span className="material-symbols-outlined" style={{ fontSize: typography.label.medium.fontSize }}>visibility</span>
             Quick View
           </QuickViewButton>
         </Overlay>
@@ -279,11 +278,11 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
         <Description>{pet.description}</Description>
         <Metadata>
           <MetadataItem>
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>calendar_today</span>
+            <span className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>calendar_today</span>
             {formatDate(pet.created)}
           </MetadataItem>
           <MetadataItem>
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>photo_camera</span>
+            <span className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>photo_camera</span>
             {fileSize}
           </MetadataItem>
         </Metadata>
@@ -293,7 +292,7 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
 
   if (link) {
     return (
-      <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none' }}>
+      <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <Card onClick={handleCardClick} $isSelected={isSelected}>
           {cardContent}
         </Card>

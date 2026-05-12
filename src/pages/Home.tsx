@@ -98,7 +98,7 @@ const LoadMoreTrigger = styled.div`
 const LoadingSpinner = styled.div`
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
+  border: 4px solid ${colors.surfaceContainer};
   border-top: 4px solid ${colors.primary};
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -110,7 +110,7 @@ const LoadingSpinner = styled.div`
 `;
 
 const Home: React.FC = () => {
-  const { pets, loading, error, refetch, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, selectAll, clearSelection } = useSelection();
+  const { pets, loading, error, refetch, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, clearSelection } = useSelection();
   const [sortOption, setSortOption] = useState<SortOption>('name-asc');
   const [isDownloading, setIsDownloading] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(12);
@@ -211,14 +211,6 @@ const Home: React.FC = () => {
     };
   }, [loadMore, hasMore, isLoadingMore]);
 
-  const handleSelectAll = () => {
-    if (selectedCount === filteredAndSortedPets.length) {
-      clearSelection();
-    } else {
-      selectAll(filteredAndSortedPets);
-    }
-  };
-
   const handleDownload = async () => {
     if (selectedCount === 0) return;
 
@@ -268,7 +260,7 @@ const Home: React.FC = () => {
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           onExport={handleDownload}
-          onShare={() => console.log('Share clicked')}
+          onShare={() => { }}
         >
           {viewMode === 'grid' ? (
             <GalleryGrid
@@ -310,11 +302,8 @@ const Home: React.FC = () => {
       <SelectionControls
         selectedCount={selectedCount}
         totalFileSize={totalFileSize}
-        onSelectAll={handleSelectAll}
         onClearSelection={clearSelection}
         onDownload={handleDownload}
-        hasPets={filteredAndSortedPets.length > 0}
-        allSelected={selectedCount === filteredAndSortedPets.length && filteredAndSortedPets.length > 0}
         isDownloading={isDownloading}
       />
     </>
