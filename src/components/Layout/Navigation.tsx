@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   colors,
@@ -14,13 +14,12 @@ import {
   patterns,
   elevation
 } from '../../theme';
-import { FilterModal, type FilterState } from '../FilterModal';
-import { UserProfile } from '../UserProfile';
 
 interface NavigationProps {
   children: React.ReactNode;
-  onFilterChange?: (filters: FilterState) => void;
   onSearchChange?: (query: string) => void;
+  searchValue?: string;
+  onSearchSubmit?: (query: string) => void;
 }
 
 // Header Styles
@@ -43,7 +42,7 @@ const Header = styled.header`
 
 const HeaderContent = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   width: 100%;
   padding: 0 ${spacing.marginMobile};
@@ -95,26 +94,13 @@ const LogoSubtitle = styled.span`
   margin-top: 2px;
 `;
 
-const NavItems = styled.nav`
-  display: none;
-  align-items: center;
-  gap: ${spacing.md};
-  
-  @media (min-width: ${breakpoints.mobile}) {
-    display: flex;
-  }
-`;
-
-const NavLink = styled.a<{ active?: boolean }>`
-  color: ${props => props.active ? colors.primary : colors.onSurfaceVariant};
-  font-weight: ${props => props.active ? '700' : '400'};
-  padding: 4px 0;
-  border-bottom: 2px solid ${props => props.active ? colors.primary : 'transparent'};
-  transition: ${transitions.default};
-  
-  &:hover {
-    color: ${colors.primary};
-  }
+const MobileNavLabel = styled.span`
+  font-size: ${typography.label.small.fontSize};
+  font-weight: ${typography.label.small.fontWeight};
+  font-family: ${typography.label.small.fontFamily};
+  color: ${colors.onSurfaceVariant};
+  line-height: 1;
+  margin-top: 2px;
 `;
 
 const SearchContainer = styled.div`
@@ -133,10 +119,15 @@ const SearchIcon = styled.span`
   top: 50%;
   transform: translateY(-50%);
   color: ${colors.onSurfaceVariant};
-  pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: ${transitions.default};
+  
+  &:hover {
+    color: ${colors.primary};
+  }
 `;
 
 const SearchInput = styled.input`
@@ -161,35 +152,6 @@ const SearchInput = styled.input`
   
   &:hover {
     background: ${colors.surfaceContainerHigh};
-  }
-`;
-
-const HeaderActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${spacing.sm};
-`;
-
-const IconButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: ${borderRadius.full};
-  background: none;
-  border: none;
-  color: ${colors.onSurfaceVariant};
-  cursor: pointer;
-  transition: ${transitions.default};
-  
-  &:hover {
-    background: ${colors.surfaceContainerHigh};
-    color: ${colors.onSurface};
-  }
-  
-  &:active {
-    transform: scale(0.95);
   }
 `;
 
@@ -235,7 +197,9 @@ const SidebarLabel = styled.span`
   letter-spacing: 0.05em;
 `;
 
-const SidebarLink = styled.a<{ active?: boolean }>`
+const SidebarLink = styled(Link).withConfig({
+  shouldForwardProp: (prop) => prop !== 'active',
+}) <{ active?: boolean }>`
   display: flex;
   align-items: center;
   gap: ${spacing.sm};
@@ -245,6 +209,7 @@ const SidebarLink = styled.a<{ active?: boolean }>`
   color: ${props => props.active ? colors.onPrimary : colors.onSurfaceVariant};
   background: ${props => props.active ? gradients.primary : 'none'};
   transition: ${transitions.default};
+  text-decoration: none;
 
   &:hover {
     background: ${props => props.active ? gradients.primary : `${colors.surfaceVariant}50`};
@@ -336,7 +301,9 @@ const MobileNav = styled.nav`
   }
 `;
 
-const MobileNavItem = styled.a<{ active?: boolean }>`
+const MobileNavItem = styled.a.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active',
+}) <{ active?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -350,102 +317,47 @@ const MobileNavItem = styled.a<{ active?: boolean }>`
   text-decoration: none;
 `;
 
-const MobileNavLabel = styled.span`
-  font-size: ${typography.label.small.fontSize};
-  font-weight: ${typography.label.small.fontWeight};
-  font-family: ${typography.label.small.fontFamily};
-`;
-
-export const Navigation: React.FC<NavigationProps> = ({ children, onFilterChange, onSearchChange }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
-    petType: [],
-    dateRange: 'all',
-    hasSelection: false,
-  });
-  const searchTimeoutRef = useRef<number | undefined>(undefined);
-
-  const handleFilterClick = () => {
-    setIsFilterOpen(true);
-  };
-
-  const handleApplyFilters = (newFilters: FilterState) => {
-    setFilters(newFilters);
-    onFilterChange?.(newFilters);
-  };
+export const Navigation: React.FC<NavigationProps> = ({ children, onSearchChange, searchValue = '', onSearchSubmit }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-
-    // Clear the previous timeout
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
-    // Set a new timeout to debounce the search
-    searchTimeoutRef.current = setTimeout(() => {
-      setDebouncedSearchQuery(query);
-    }, 300);
+    onSearchChange?.(query);
   };
 
-  // Update the parent component when debounced query changes
-  useEffect(() => {
-    onSearchChange?.(debouncedSearchQuery);
-  }, [debouncedSearchQuery, onSearchChange]);
+  const handleSearchSubmit = () => {
+    if (searchValue.trim()) {
+      onSearchSubmit?.(searchValue);
+      searchInputRef.current?.blur();
+      navigate(`/search?q=${encodeURIComponent(searchValue)}`);
+    }
+  };
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, []);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit();
+    }
+  };
 
   return (
     <NavigationContainer>
       <Header>
         <HeaderContent>
-          <NavItems>
-            <NavLink href="#" active>Gallery</NavLink>
-            <NavLink href="#">Collections</NavLink>
-            <NavLink href="#">Trending</NavLink>
-          </NavItems>
-
           <SearchContainer>
-            <SearchIcon>
-              <span className="material-symbols-outlined">search</span>
-            </SearchIcon>
+            <SearchIcon
+              className="material-symbols-outlined"
+              onClick={handleSearchSubmit}
+            >search</SearchIcon>
             <SearchInput
+              ref={searchInputRef}
               type="text"
               placeholder="Search gallery..."
-              value={searchQuery}
+              value={searchValue}
               onChange={(e) => handleSearchChange(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </SearchContainer>
-
-          <HeaderActions>
-            <IconButton
-              aria-label="Filter"
-              onClick={handleFilterClick}
-              style={{
-                background: filters.petType.length > 0 || filters.dateRange !== 'all' || filters.hasSelection
-                  ? `${colors.primaryContainer}20`
-                  : 'none'
-              }}
-            >
-              <span className="material-symbols-outlined">filter_list</span>
-            </IconButton>
-            <IconButton aria-label="Sort">
-              <span className="material-symbols-outlined">sort</span>
-            </IconButton>
-            <UserProfile
-              userName="Pet Lover"
-              onSignOut={() => { }}
-            />
-          </HeaderActions>
         </HeaderContent>
       </Header>
 
@@ -458,50 +370,33 @@ export const Navigation: React.FC<NavigationProps> = ({ children, onFilterChange
               </span>
             </LogoIcon>
             <LogoTextContainer>
-              <LogoText>Pet Gallery</LogoText>
+              <LogoText>PawShots</LogoText>
               <LogoSubtitle>Premium Collection</LogoSubtitle>
             </LogoTextContainer>
           </Logo>
         </Link>
         <SidebarSection style={{ marginTop: spacing.lg }}>
           <SidebarLabel>Library</SidebarLabel>
-          <SidebarLink href="#" active>
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
+          <SidebarLink to="/" active={location.pathname === '/'}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/' ? "'FILL' 1" : 'FILL 0' }}>
               photo_library
             </span>
             All Photos
           </SidebarLink>
-          <SidebarLink href="#">
-            <span className="material-symbols-outlined">favorite</span>
+          <SidebarLink to="/favorites" active={location.pathname === '/favorites'}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/favorites' ? "'FILL' 1" : 'FILL 0' }}>
+              favorite
+            </span>
             Favorites
-          </SidebarLink>
-          <SidebarLink href="#">
-            <span className="material-symbols-outlined">group</span>
-            Shared
-          </SidebarLink>
-          <SidebarLink href="#">
-            <span className="material-symbols-outlined">delete</span>
-            Trash
           </SidebarLink>
         </SidebarSection>
 
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: spacing.xs, marginBottom: spacing.lg }}>
-          <UploadButton>
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-              add_circle
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
+          <SidebarLink to="/about" active={location.pathname === '/about'}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/about' ? "'FILL' 1" : 'FILL 0' }}>
+              info
             </span>
-            Upload Pet
-          </UploadButton>
-
-          <SidebarDivider />
-
-          <SidebarLink href="#">
-            <span className="material-symbols-outlined">settings</span>
-            Settings
-          </SidebarLink>
-          <SidebarLink href="#">
-            <span className="material-symbols-outlined">help</span>
-            Help
+            About
           </SidebarLink>
         </div>
       </Sidebar>
@@ -530,13 +425,6 @@ export const Navigation: React.FC<NavigationProps> = ({ children, onFilterChange
           <MobileNavLabel>Profile</MobileNavLabel>
         </MobileNavItem>
       </MobileNav>
-
-      <FilterModal
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        onApplyFilters={handleApplyFilters}
-        currentFilters={filters}
-      />
     </NavigationContainer>
   );
 };

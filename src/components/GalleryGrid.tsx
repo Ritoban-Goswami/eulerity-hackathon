@@ -15,6 +15,17 @@ interface GalleryGridProps {
   onRetry?: () => void;
 }
 
+/**
+ * GalleryGrid Component
+ * 
+ * Displays a responsive grid of pet cards with the following breakpoints:
+ * - Mobile (< 768px): 1 column
+ * - Tablet (768px - 1024px): 2 columns
+ * - Desktop (>= 1024px): 4 columns
+ * 
+ * Supports loading, error, and empty states with appropriate UI.
+ */
+
 const Grid = styled.div`
   display: grid;
   gap: ${spacing.md};
@@ -29,15 +40,10 @@ const Grid = styled.div`
     gap: ${spacing.md};
   }
 
-  /* Desktop: 3 columns */
+  /* Desktop: 4 columns */
   @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
-    gap: ${spacing.md};
-  }
-
-  /* Large desktop: 4 columns */
-  @media (min-width: 1280px) {
     grid-template-columns: repeat(4, 1fr);
+    gap: ${spacing.md};
   }
 `;
 

@@ -6,10 +6,10 @@ interface SearchResultsProps {
   query: string;
   totalResults: number;
   children: React.ReactNode;
-  viewMode?: 'grid' | 'list';
-  onViewModeChange?: (mode: 'grid' | 'list') => void;
   onExport?: () => void;
   onShare?: () => void;
+  onRecentSearchClick?: (term: string) => void;
+  recentSearches?: Array<{ term: string; primary?: boolean }>;
 }
 
 const ResultsHeader = styled.div`
@@ -148,62 +148,17 @@ const RecentSearchChip = styled.button<{ primary?: boolean }>`
   }
 `;
 
-const ViewControls = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${spacing.sm};
-  
-  @media (max-width: 767px) {
-    margin-top: ${spacing.sm};
-  }
-`;
-
-const ViewToggle = styled.div`
-  display: flex;
-  background: ${colors.surfaceContainer};
-  border-radius: ${borderRadius.lg};
-  padding: 4px;
-`;
-
-const ViewButton = styled.button<{ active?: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: ${borderRadius.md};
-  background: ${props => props.active ? colors.surface : 'transparent'};
-  border: none;
-  color: ${props => props.active ? colors.primary : colors.onSurfaceVariant};
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${props => props.active ? colors.surface : `${colors.surfaceVariant}50`};
-  }
-`;
-
 export const SearchResults: React.FC<SearchResultsProps> = ({
   query,
   totalResults,
   children,
-  viewMode = 'grid',
-  onViewModeChange,
   onExport,
-  onShare
+  onShare,
+  onRecentSearchClick,
+  recentSearches = []
 }) => {
-  const recentSearches = [
-    { term: 'Puppy Training', primary: true },
-    { term: 'Beagle Mix', primary: false },
-    { term: 'Pet Bed DIY', primary: false }
-  ];
-
-  const handleViewModeChange = (mode: 'grid' | 'list') => {
-    onViewModeChange?.(mode);
-  };
-
-  const handleRecentSearchClick = (_term: string) => {
-    // This would typically update the search query
+  const handleRecentSearchClick = (term: string) => {
+    onRecentSearchClick?.(term);
   };
 
   return (
@@ -244,25 +199,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
             ))}
           </RecentSearchesList>
         </RecentSearchesSection>
-
-        <ViewControls>
-          <ViewToggle>
-            <ViewButton
-              active={viewMode === 'grid'}
-              onClick={() => handleViewModeChange('grid')}
-              aria-label="Grid view"
-            >
-              <span className="material-symbols-outlined">grid_view</span>
-            </ViewButton>
-            <ViewButton
-              active={viewMode === 'list'}
-              onClick={() => handleViewModeChange('list')}
-              aria-label="List view"
-            >
-              <span className="material-symbols-outlined">view_list</span>
-            </ViewButton>
-          </ViewToggle>
-        </ViewControls>
       </ResultsHeader>
 
       {children}

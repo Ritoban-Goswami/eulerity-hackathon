@@ -8,6 +8,8 @@ interface SelectionControlsProps {
   onClearSelection: () => void;
   onDownload: () => void;
   isDownloading?: boolean;
+  onSelectAll?: () => void;
+  totalItems?: number;
 }
 
 const Container = styled.div<{ isVisible: boolean }>`
@@ -48,7 +50,7 @@ const Pill = styled.div`
   -webkit-backdrop-filter: blur(${glass.blurHeavy});
   color: ${colors.inverseOnSurface};
   border-radius: ${borderRadius.xl};
-  padding: ${spacing.md} ${spacing.xl};
+  padding: 14px;
   box-shadow: ${elevation.level3};
   display: inline-flex;
   align-items: center;
@@ -137,7 +139,24 @@ const ClearButton = styled.button`
   }
 `;
 
+const SelectAllButton = styled.button`
+  background: none;
+  color: ${colors.onPrimaryContainer};
+  font-size: ${typography.label.medium.fontSize};
+  font-weight: ${typography.label.medium.fontWeight};
+  font-family: ${typography.label.medium.fontFamily};
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: ${spacing.md};
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const CloseButton = styled.button`
+display: flex;
   margin-left: ${spacing.sm};
   padding: 4px;
   border-radius: ${borderRadius.full};
@@ -158,6 +177,8 @@ export const SelectionControls: React.FC<SelectionControlsProps> = ({
   onClearSelection,
   onDownload,
   isDownloading = false,
+  onSelectAll,
+  totalItems,
 }) => {
   const isVisible = selectedCount > 0;
 
@@ -183,6 +204,12 @@ export const SelectionControls: React.FC<SelectionControlsProps> = ({
         </SelectionInfo>
 
         <Actions>
+          {onSelectAll && totalItems && selectedCount < totalItems && (
+            <SelectAllButton onClick={onSelectAll}>
+              Select All ({totalItems})
+            </SelectAllButton>
+          )}
+
           <DownloadButton
             onClick={onDownload}
             disabled={isDownloading}

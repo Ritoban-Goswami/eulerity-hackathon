@@ -42,10 +42,10 @@ export const usePetData = (): UsePetDataReturn => {
           "format=tiny",
           "auto=compress&cs=tinysrgb&w=400&h=500&fit=crop",
         ),
-        // Store original high-quality URL for detail page (4/3 aspect ratio)
+        // Store original high-quality URL for detail page (no fit constraint)
         originalUrl: pet.url.replace(
           "format=tiny",
-          "auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop",
+          "auto=compress&cs=tinysrgb&w=1200",
         ),
       }));
 

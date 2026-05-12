@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { colors, typography, spacing, borderRadius, elevation, transitions, aspectRatios } from '../theme';
 import type { Pet } from '../types/pet';
+import { QuickViewModal } from './QuickViewModal';
+import { FavoriteButton } from './FavoriteButton';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 interface PetCardProps {
   pet: Pet;
@@ -133,14 +136,19 @@ const QuickViewButton = styled.button`
   border: none;
   cursor: pointer;
   padding: 0;
-  
+  transition: ${transitions.default};
+
   &:hover {
-    text-decoration: underline;
+    color: ${colors.onPrimary}90;
   }
 `;
 
 const Content = styled.div`
   padding: ${spacing.sm};
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around
 `;
 
 const Header = styled.div`
@@ -189,6 +197,7 @@ const Metadata = styled.div`
   font-weight: ${typography.label.small.fontWeight};
   font-family: ${typography.label.small.fontFamily};
   color: ${colors.outline};
+  margin-top: 8px;
 `;
 
 const MetadataItem = styled.span`
@@ -224,6 +233,9 @@ const formatFileSize = (petId: string) => {
 };
 
 export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, onToggleSelection, link = false }) => {
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
+
   const handleCardClick = (e: React.MouseEvent) => {
     if (e.target !== e.currentTarget && !(e.target as HTMLElement).classList.contains('card-content')) {
       return;
@@ -235,7 +247,14 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
 
   const handleQuickView = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Implement quick view modal
+    e.preventDefault();
+    setIsQuickViewOpen(true);
+  };
+
+  const handleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    toggleFavorite(pet.id);
   };
 
   const breed = extractBreed(pet.title);
@@ -251,6 +270,11 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
           decoding="async"
           width="400"
           height="300"
+        />
+        <FavoriteButton
+          isFavorite={isFavorite(pet.id)}
+          onClick={handleFavorite}
+          ariaLabel={isFavorite(pet.id) ? `Remove ${pet.title} from favorites` : `Add ${pet.title} to favorites`}
         />
         <Checkbox
           type="checkbox"
@@ -292,17 +316,31 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
 
   if (link) {
     return (
-      <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-        <Card onClick={handleCardClick} $isSelected={isSelected}>
-          {cardContent}
-        </Card>
-      </Link>
+      <>
+        <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Card onClick={handleCardClick} $isSelected={isSelected}>
+            {cardContent}
+          </Card>
+        </Link>
+        <QuickViewModal
+          pet={pet}
+          isOpen={isQuickViewOpen}
+          onClose={() => setIsQuickViewOpen(false)}
+        />
+      </>
     );
   }
 
   return (
-    <Card onClick={handleCardClick} $isSelected={isSelected}>
-      {cardContent}
-    </Card>
+    <>
+      <Card onClick={handleCardClick} $isSelected={isSelected}>
+        {cardContent}
+      </Card>
+      <QuickViewModal
+        pet={pet}
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+      />
+    </>
   );
 });

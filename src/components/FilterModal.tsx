@@ -13,6 +13,7 @@ export interface FilterState {
   petType: string[];
   dateRange: string;
   hasSelection: boolean;
+  hasFavorites: boolean;
 }
 
 const Overlay = styled.div<{ isOpen: boolean }>`
@@ -217,6 +218,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
       petType: [],
       dateRange: 'all',
       hasSelection: false,
+      hasFavorites: false,
     });
   };
 
@@ -270,6 +272,17 @@ export const FilterModal: React.FC<FilterModalProps> = ({
               onChange={(e) => setFilters(prev => ({ ...prev, hasSelection: e.target.checked }))}
             />
             Show only selected items
+          </CheckboxLabel>
+        </Section>
+
+        <Section>
+          <CheckboxLabel>
+            <Checkbox
+              type="checkbox"
+              checked={filters.hasFavorites}
+              onChange={(e) => setFilters(prev => ({ ...prev, hasFavorites: e.target.checked }))}
+            />
+            Show only favorites
           </CheckboxLabel>
         </Section>
 
