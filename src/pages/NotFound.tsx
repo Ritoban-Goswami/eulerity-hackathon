@@ -16,65 +16,88 @@ const NotFoundContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: ${spacing.xl};
+  padding: ${spacing.sm};
   text-align: center;
+  
+  @media (min-width: 768px) {
+    padding: ${spacing.xl};
+  }
 `;
 
 const ContentCard = styled.div`
   background: ${colors.surfaceContainerLowest};
-  padding: ${spacing.xl};
+  padding: ${spacing.md};
   border-radius: ${borderRadius.lg};
   box-shadow: ${elevation.level1};
   max-width: 500px;
   width: 100%;
+  
+  @media (min-width: 768px) {
+    padding: ${spacing.xl};
+  }
 `;
 
 const ErrorCode = styled.h1`
-  font-size: ${typography.display.fontSize};
-  font-weight: ${typography.display.fontWeight};
+  font-size: 48px;
+  font-weight: 700;
   font-family: ${typography.display.fontFamily};
   color: ${colors.primary};
   line-height: 1;
   
-  @media (max-width: 768px) {
-    font-size: ${typography.headline.large.fontSize};
+  @media (min-width: 768px) {
+    font-size: ${typography.display.fontSize};
+    font-weight: ${typography.display.fontWeight};
   }
 `;
 
 const Title = styled.h2`
-  font-size: ${typography.headline.large.fontSize};
-  font-weight: ${typography.headline.large.fontWeight};
+  font-size: 20px;
+  font-weight: 600;
   font-family: ${typography.headline.large.fontFamily};
   color: ${colors.onSurface};
-  margin: ${spacing.lg} 0 ${spacing.md} 0;
+  margin: ${spacing.md} 0 ${spacing.sm} 0;
   
-  @media (max-width: 768px) {
-    font-size: ${typography.headline.medium.fontSize};
+  @media (min-width: 768px) {
+    font-size: ${typography.headline.large.fontSize};
+    font-weight: ${typography.headline.large.fontWeight};
+    margin: ${spacing.lg} 0 ${spacing.md} 0;
   }
 `;
 
 const Message = styled.p`
-  font-size: ${typography.body.large.fontSize};
-  font-weight: ${typography.body.large.fontWeight};
-  font-family: ${typography.body.large.fontFamily};
+  font-size: 14px;
+  font-weight: 400;
+  font-family: ${typography.body.medium.fontFamily};
   color: ${colors.onSurfaceVariant};
-  margin: 0 0 ${spacing.xl} 0;
+  margin: 0 0 ${spacing.lg} 0;
   line-height: 1.5;
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.body.large.fontSize};
+    font-weight: ${typography.body.large.fontWeight};
+    margin: 0 0 ${spacing.xl} 0;
+  }
 `;
 
 const HomeButton = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: ${spacing.sm};
-  padding: ${spacing.md} ${spacing.xl};
+  padding: 10px 20px;
   background: ${colors.primary};
   color: ${colors.onPrimary};
   text-decoration: none;
   border-radius: ${borderRadius.lg};
-  font-size: ${typography.label.medium.fontSize};
-  font-weight: ${typography.label.medium.fontWeight};
+  font-size: 14px;
+  font-weight: 600;
   font-family: ${typography.label.medium.fontFamily};
   transition: ${transitions.default};
+  
+  @media (min-width: 768px) {
+    padding: ${spacing.md} ${spacing.xl};
+    font-size: ${typography.label.medium.fontSize};
+    font-weight: ${typography.label.medium.fontWeight};
+  }
   
   &:hover {
     background: ${colors.primary}90;
@@ -88,7 +111,11 @@ const HomeButton = styled(Link)`
 `;
 
 const IconContainer = styled.div`
-  margin-bottom: ${spacing.lg};
+  margin-bottom: ${spacing.md};
+  
+  @media (min-width: 768px) {
+    margin-bottom: ${spacing.lg};
+  }
 `;
 
 const NotFound: React.FC = () => {
@@ -98,7 +125,7 @@ const NotFound: React.FC = () => {
         <ContentCard>
           <IconContainer>
             <span className="material-symbols-outlined" style={{
-              fontSize: typography.display.fontSize,
+              fontSize: '48px',
               color: colors.primary,
               opacity: 0.3
             }}>

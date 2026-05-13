@@ -41,6 +41,13 @@ const Card = styled.article<{ $isSelected?: boolean }>`
     outline: none;
   }
 
+  @media (max-width: 767px) {
+    &:hover {
+      transform: none;
+      box-shadow: ${elevation.level1};
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     transition: none;
 
@@ -83,6 +90,11 @@ const Checkbox = styled.input`
   display: flex;
   align-items: center;
   justify-content: center;
+  
+  @media (min-width: 768px) {
+    width: 28px;
+    height: 28px;
+  }
 
   &:checked {
     background: ${colors.primary};
@@ -92,11 +104,15 @@ const Checkbox = styled.input`
   &:checked::after {
     content: '✓';
     color: ${colors.onPrimary};
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
+    
+    @media (min-width: 768px) {
+      font-size: 18px;
+    }
   }
 
   &:focus-visible {
@@ -117,10 +133,22 @@ const Overlay = styled.div`
   transition: ${transitions.fadeIn};
   display: flex;
   align-items: flex-end;
-  padding: ${spacing.md};
+  padding: ${spacing.sm};
+  
+  @media (min-width: 768px) {
+    padding: ${spacing.md};
+  }
   
   ${Card}:hover & {
     opacity: 1;
+  }
+
+  @media (max-width: 767px) {
+    opacity: 0;
+  }
+
+  @media (hover: none) {
+    opacity: 0;
   }
 `;
 
@@ -129,14 +157,23 @@ const QuickViewButton = styled.button`
   display: flex;
   align-items: center;
   gap: ${spacing.xs};
-  font-size: ${typography.label.medium.fontSize};
-  font-weight: ${typography.label.medium.fontWeight};
+  font-size: 12px;
+  font-weight: 500;
   font-family: ${typography.label.medium.fontFamily};
   background: none;
   border: none;
   cursor: pointer;
+
+  @media (max-width: 767px) {
+    display: none;
+  }
   padding: 0;
   transition: ${transitions.default};
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.label.medium.fontSize};
+    font-weight: ${typography.label.medium.fontWeight};
+  }
 
   &:hover {
     color: ${colors.onPrimary}90;
@@ -148,7 +185,11 @@ const Content = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-around
+  justify-content: space-around;
+  
+  @media (min-width: 768px) {
+    padding: ${spacing.sm};
+  }
 `;
 
 const Header = styled.div`
@@ -160,44 +201,68 @@ const Header = styled.div`
 
 const Title = styled.h3`
   margin: 0;
-  font-size: ${typography.headline.medium.fontSize};
-  font-weight: ${typography.headline.medium.fontWeight};
+  font-size: 15px;
+  font-weight: 600;
   font-family: ${typography.headline.medium.fontFamily};
   color: ${colors.primary};
+  line-height: 1.3;
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.headline.medium.fontSize};
+    font-weight: ${typography.headline.medium.fontWeight};
+  }
 `;
 
 const BreedBadge = styled.span`
   background: ${colors.primary}10;
   color: ${colors.primary};
-  font-size: 10px;
+  font-size: 9px;
   text-transform: uppercase;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: ${borderRadius.full};
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  
+  @media (min-width: 768px) {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
 `;
 
 const Description = styled.p`
-  font-size: ${typography.body.small.fontSize};
-  font-weight: ${typography.body.small.fontWeight};
+  font-size: 13px;
+  font-weight: 400;
   font-family: ${typography.body.small.fontFamily};
   color: ${colors.onSurfaceVariant};
-  line-height: ${typography.body.small.lineHeight};
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.body.small.fontSize};
+    font-weight: ${typography.body.small.fontWeight};
+    line-height: ${typography.body.small.lineHeight};
+  }
 `;
 
 const Metadata = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: ${typography.label.small.fontSize};
-  font-weight: ${typography.label.small.fontWeight};
+  font-size: 12px;
+  font-weight: 500;
   font-family: ${typography.label.small.fontFamily};
   color: ${colors.outline};
   margin-top: 8px;
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.label.small.fontSize};
+    font-weight: ${typography.label.small.fontWeight};
+    margin-top: 8px;
+  }
 `;
 
 const MetadataItem = styled.span`
@@ -289,8 +354,8 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
         />
         <Overlay>
           <QuickViewButton onClick={handleQuickView}>
-            <span className="material-symbols-outlined" style={{ fontSize: typography.label.medium.fontSize }}>visibility</span>
-            Quick View
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>visibility</span>
+            <span>Quick View</span>
           </QuickViewButton>
         </Overlay>
       </ImageContainer>

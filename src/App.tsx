@@ -3,7 +3,6 @@ import { SelectionProvider } from './contexts/SelectionContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Home from './pages/Home';
-import Search from './pages/Search';
 import PetDetail from './pages/PetDetail';
 import About from './pages/About';
 import Favorites from './pages/Favorites';
@@ -17,7 +16,6 @@ function App() {
           <Router>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/search" element={<Search />} />
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/pet/:id" element={<PetDetail />} />
               <Route path="/about" element={<About />} />

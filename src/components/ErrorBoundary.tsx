@@ -13,11 +13,23 @@ const ErrorContainer = styled.div`
   background-image: ${patterns.dotGrid};
   background-size: 20px 20px;
   text-align: center;
+  
+  @media (max-width: 479px) {
+    padding: ${spacing.md};
+  }
 `;
 
 const ErrorIcon = styled.div`
   color: ${colors.error};
   margin-bottom: ${spacing.sm};
+  
+  @media (max-width: 479px) {
+    margin-bottom: ${spacing.xs};
+    
+    & span {
+      font-size: 28px !important;
+    }
+  }
 `;
 
 const ErrorContent = styled.div`
@@ -29,6 +41,11 @@ const ErrorContent = styled.div`
   box-shadow: ${elevation.level2};
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  
+  @media (max-width: 479px) {
+    padding: ${spacing.md};
+    max-width: 100%;
+  }
 `;
 
 const ErrorTitle = styled.h1`
@@ -38,6 +55,11 @@ const ErrorTitle = styled.h1`
   color: ${colors.onSurface};
   margin: 0 0 ${spacing.sm} 0;
   line-height: ${typography.headline.large.lineHeight};
+  
+  @media (max-width: 479px) {
+    font-size: 24px;
+    margin-bottom: ${spacing.xs};
+  }
 `;
 
 const ErrorMessage = styled.p`
@@ -48,6 +70,12 @@ const ErrorMessage = styled.p`
   margin: 0 0 ${spacing.lg} 0;
   max-width: 500px;
   line-height: ${typography.body.medium.lineHeight};
+  
+  @media (max-width: 479px) {
+    font-size: 14px;
+    margin-bottom: ${spacing.md};
+    max-width: 100%;
+  }
 `;
 
 const ErrorDetails = styled.details`
@@ -55,6 +83,11 @@ const ErrorDetails = styled.details`
   text-align: left;
   max-width: 500px;
   width: 100%;
+  
+  @media (max-width: 479px) {
+    margin-top: ${spacing.sm};
+    max-width: 100%;
+  }
 `;
 
 const ErrorSummary = styled.summary`
@@ -68,6 +101,11 @@ const ErrorSummary = styled.summary`
   font-family: ${typography.body.medium.fontFamily};
   user-select: none;
   transition: ${transitions.default};
+
+  @media (max-width: 479px) {
+    padding: ${spacing.xs} ${spacing.sm};
+    font-size: 13px;
+  }
 
   &:hover {
     background: ${colors.surfaceContainerHover};
@@ -86,6 +124,12 @@ const ErrorStack = styled.pre`
   white-space: pre-wrap;
   word-wrap: break-word;
   line-height: 1.4;
+  
+  @media (max-width: 479px) {
+    padding: ${spacing.sm};
+    font-size: 11px;
+    margin-top: ${spacing.sm};
+  }
 `;
 
 const RetryButton = styled.button`
@@ -99,6 +143,11 @@ const RetryButton = styled.button`
   font-family: ${typography.label.medium.fontFamily};
   cursor: pointer;
   transition: ${transitions.default};
+
+  @media (max-width: 479px) {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
 
   &:hover {
     transform: translateY(-2px);
