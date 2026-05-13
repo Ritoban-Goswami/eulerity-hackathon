@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   colors,
@@ -17,9 +17,10 @@ import {
 
 interface NavigationProps {
   children: React.ReactNode;
+  showSearch?: boolean;
   onSearchChange?: (query: string) => void;
-  searchValue?: string;
   onSearchSubmit?: (query: string) => void;
+  searchValue?: string;
 }
 
 // Header Styles
@@ -33,25 +34,32 @@ const Header = styled.header`
   backdrop-filter: blur(${glass.blur});
   -webkit-backdrop-filter: blur(${glass.blur});
   border-bottom: 1px solid ${colors.surfaceContainerHigh};
-  height: 80px;
+  height: 64px;
 
   @media (max-width: ${breakpoints.tablet}) {
     left: 0;
+    height: 60px;
   }
 `;
 
 const HeaderContent = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 0 ${spacing.marginMobile};
+  padding: 0 12px;
   height: 100%;
+  gap: 8px;
   
   @media (min-width: ${breakpoints.mobile}) {
     padding: 0 ${spacing.gutter};
     max-width: ${spacing.containerMax};
     margin: 0 auto;
+    gap: ${spacing.md};
+  }
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    justify-content: flex-end;
   }
 `;
 
@@ -61,15 +69,31 @@ const Logo = styled.div`
   gap: ${spacing.sm};
 `;
 
+const HeaderLogo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.sm};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    display: none;
+  }
+`;
+
 const LogoIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background: ${gradients.primary};
-  border-radius: ${borderRadius.lg};
+  border-radius: ${borderRadius.md};
   box-shadow: ${elevation.level1};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    width: 40px;
+    height: 40px;
+    border-radius: ${borderRadius.lg};
+  }
 `;
 
 const LogoTextContainer = styled.div`
@@ -78,38 +102,53 @@ const LogoTextContainer = styled.div`
 `;
 
 const LogoText = styled.span`
-  font-size: ${typography.headline.medium.fontSize};
-  font-weight: ${typography.headline.medium.fontWeight};
+  font-size: 16px;
+  font-weight: 700;
   font-family: ${typography.headline.medium.fontFamily};
   color: ${colors.primary};
   line-height: 1;
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    font-size: ${typography.headline.medium.fontSize};
+    font-weight: ${typography.headline.medium.fontWeight};
+  }
 `;
 
 const LogoSubtitle = styled.span`
-  font-size: ${typography.label.small.fontSize};
-  font-weight: ${typography.label.small.fontWeight};
+  font-size: 10px;
+  font-weight: 500;
   font-family: ${typography.label.small.fontFamily};
   color: ${colors.onSurfaceVariant};
   line-height: 1;
   margin-top: 2px;
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    font-size: ${typography.label.small.fontSize};
+    font-weight: ${typography.label.small.fontWeight};
+  }
 `;
 
-const MobileNavLabel = styled.span`
-  font-size: ${typography.label.small.fontSize};
-  font-weight: ${typography.label.small.fontWeight};
+const MobileNavLabel = styled.span.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active',
+}) <{ active?: boolean }>`
+  font-size: 11px;
+  font-weight: 500;
   font-family: ${typography.label.small.fontFamily};
-  color: ${colors.onSurfaceVariant};
+  color: ${props => props.active ? colors.onPrimaryContainer : colors.onSurfaceVariant};
   line-height: 1;
-  margin-top: 2px;
 `;
 
 const SearchContainer = styled.div`
   position: relative;
   display: flex;
   align-items: center;
+  width: 256px;
+  flex: 0 0 auto;
   
-  @media (min-width: ${breakpoints.mobile}) {
-    width: 256px;
+  @media (max-width: ${breakpoints.mobile}) {
+    width: auto;
+    flex: 1;
+    max-width: 150px;
   }
 `;
 
@@ -124,9 +163,15 @@ const SearchIcon = styled.span`
   justify-content: center;
   cursor: pointer;
   transition: ${transitions.default};
+  font-size: 20px;
   
   &:hover {
     color: ${colors.primary};
+  }
+  
+  @media (max-width: ${breakpoints.mobile}) {
+    left: 10px;
+    font-size: 18px;
   }
 `;
 
@@ -153,7 +198,15 @@ const SearchInput = styled.input`
   &:hover {
     background: ${colors.surfaceContainerHigh};
   }
+  
+  @media (max-width: ${breakpoints.mobile}) {
+    padding: 6px 10px 6px 32px;
+    font-size: 13px;
+  }
 `;
+
+
+
 
 const NavigationContainer = styled.div`
   display: flex;
@@ -254,7 +307,7 @@ const Main = styled.main`
   flex: 1;
   width: 100%;
   padding: ${spacing.marginMobile};
-  padding-top: calc(80px + ${spacing.marginMobile});
+  padding-top: calc(60px + ${spacing.marginMobile});
   padding-bottom: ${spacing.xl};
   background: ${colors.surface};
   background-image: ${patterns.dotGrid};
@@ -263,7 +316,7 @@ const Main = styled.main`
 
   @media (min-width: ${breakpoints.mobile}) {
     padding: 0 ${spacing.gutter};
-    padding-top: calc(80px + ${spacing.gutter});
+    padding-top: calc(64px + ${spacing.gutter});
     padding-bottom: ${spacing.xl};
     max-width: ${spacing.containerMax};
     margin: 0 auto;
@@ -292,7 +345,7 @@ const MobileNav = styled.nav`
   border-top: 1px solid ${colors.outlineVariant}20;
   justify-content: space-around;
   align-items: center;
-  padding: 8px 16px;
+  padding: 8px 12px;
   padding-bottom: max(8px, env(safe-area-inset-bottom));
   box-shadow: ${elevation.level1};
 
@@ -301,63 +354,66 @@ const MobileNav = styled.nav`
   }
 `;
 
-const MobileNavItem = styled.a.withConfig({
+const MobileNavItem = styled(Link).withConfig({
   shouldForwardProp: (prop) => prop !== 'active',
 }) <{ active?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  border-radius: ${borderRadius.full};
-  gap: 2px;
-  min-width: 60px;
-  background: ${props => props.active ? colors.secondaryContainer : 'none'};
-  color: ${props => props.active ? colors.onSecondaryContainer : colors.onSurfaceVariant};
+  padding: 8px 12px;
+  border-radius: ${borderRadius.lg};
+  gap: 4px;
+  width: 72px;
+  background: ${props => props.active ? colors.primaryContainer : 'none'};
+  color: ${props => props.active ? colors.onPrimaryContainer : colors.onSurfaceVariant};
   text-decoration: none;
+  transition: ${transitions.default};
+
+  &:active {
+    transform: scale(0.95);
+  }
 `;
 
-export const Navigation: React.FC<NavigationProps> = ({ children, onSearchChange, searchValue = '', onSearchSubmit }) => {
+export const Navigation: React.FC<NavigationProps> = ({ children, showSearch = false, onSearchChange, onSearchSubmit, searchValue = '' }) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSearchChange = (query: string) => {
     onSearchChange?.(query);
   };
 
-  const handleSearchSubmit = () => {
-    if (searchValue.trim()) {
-      onSearchSubmit?.(searchValue);
-      searchInputRef.current?.blur();
-      navigate(`/search?q=${encodeURIComponent(searchValue)}`);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearchSubmit();
-    }
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearchSubmit?.(searchValue);
   };
 
   return (
     <NavigationContainer>
       <Header>
         <HeaderContent>
-          <SearchContainer>
-            <SearchIcon
-              className="material-symbols-outlined"
-              onClick={handleSearchSubmit}
-            >search</SearchIcon>
-            <SearchInput
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search gallery..."
-              value={searchValue}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-          </SearchContainer>
+          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <HeaderLogo>
+              <LogoIcon>
+                <span className="material-symbols-outlined" style={{ color: colors.onPrimaryContainer, fontSize: '18px' }}>
+                  pets
+                </span>
+              </LogoIcon>
+              <LogoTextContainer>
+                <LogoText>PawShots</LogoText>
+              </LogoTextContainer>
+            </HeaderLogo>
+          </Link>
+          {showSearch && (
+            <SearchContainer as="form" onSubmit={handleSearchSubmit}>
+              <SearchIcon className="material-symbols-outlined">search</SearchIcon>
+              <SearchInput
+                type="text"
+                placeholder="Search..."
+                value={searchValue}
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
+            </SearchContainer>
+          )}
         </HeaderContent>
       </Header>
 
@@ -406,23 +462,23 @@ export const Navigation: React.FC<NavigationProps> = ({ children, onSearchChange
       </Main>
 
       <MobileNav>
-        <MobileNavItem href="#" active>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-            home
+        <MobileNavItem to="/" active={location.pathname === '/'}>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/' ? "'FILL' 1" : 'FILL 0', fontSize: '24px' }}>
+            photo_library
           </span>
-          <MobileNavLabel>Home</MobileNavLabel>
+          <MobileNavLabel active={location.pathname === '/'}>Gallery</MobileNavLabel>
         </MobileNavItem>
-        <MobileNavItem href="#">
-          <span className="material-symbols-outlined">search</span>
-          <MobileNavLabel>Search</MobileNavLabel>
+        <MobileNavItem to="/favorites" active={location.pathname === '/favorites'}>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/favorites' ? "'FILL' 1" : 'FILL 0', fontSize: '24px' }}>
+            favorite
+          </span>
+          <MobileNavLabel active={location.pathname === '/favorites'}>Favorites</MobileNavLabel>
         </MobileNavItem>
-        <MobileNavItem href="#">
-          <span className="material-symbols-outlined">add_circle</span>
-          <MobileNavLabel>Upload</MobileNavLabel>
-        </MobileNavItem>
-        <MobileNavItem href="#">
-          <span className="material-symbols-outlined">person</span>
-          <MobileNavLabel>Profile</MobileNavLabel>
+        <MobileNavItem to="/about" active={location.pathname === '/about'}>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/about' ? "'FILL' 1" : 'FILL 0', fontSize: '24px' }}>
+            info
+          </span>
+          <MobileNavLabel active={location.pathname === '/about'}>About</MobileNavLabel>
         </MobileNavItem>
       </MobileNav>
     </NavigationContainer>

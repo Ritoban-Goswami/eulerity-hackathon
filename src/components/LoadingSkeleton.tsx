@@ -54,6 +54,10 @@ const ContentSkeleton = styled.div`
   flex-direction: column;
   gap: 8px;
   flex: 1;
+  
+  @media (max-width: 479px) {
+    gap: 6px;
+  }
 `;
 
 const CheckboxSkeleton = styled.div`
@@ -71,6 +75,11 @@ const CheckboxSkeleton = styled.div`
   );
   background-size: 1000px 100%;
   animation: ${shimmer} 2s infinite;
+  
+  @media (max-width: 479px) {
+    width: 24px;
+    height: 24px;
+  }
 `;
 
 const FavoriteSkeleton = styled.div`
@@ -88,53 +97,11 @@ const FavoriteSkeleton = styled.div`
   );
   background-size: 1000px 100%;
   animation: ${shimmer} 2s infinite;
-`;
-
-const ListSkeleton = styled.div`
-  display: flex;
-  background: ${colors.surfaceContainerLowest};
-  border-radius: ${borderRadius.lg};
-  overflow: hidden;
-  box-shadow: ${elevation.level1};
-  border: 1px solid ${colors.outlineVariant};
-`;
-
-const ListImageSkeleton = styled.div`
-  width: 200px;
-  aspect-ratio: 4/3;
-  flex-shrink: 0;
-  background: linear-gradient(
-    90deg,
-    ${colors.surfaceContainer} 25%,
-    ${colors.surfaceContainerHigh} 50%,
-    ${colors.surfaceContainer} 75%
-  );
-  background-size: 1000px 100%;
-  animation: ${shimmer} 2s infinite;
   
-  @media (max-width: 768px) {
-    width: 120px;
+  @media (max-width: 479px) {
+    width: 28px;
+    height: 28px;
   }
-`;
-
-const ListContentSkeleton = styled.div`
-  flex: 1;
-  padding: ${spacing.sm};
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 150px;
-  gap: 8px;
-  
-  @media (max-width: 768px) {
-    min-height: 120px;
-  }
-`;
-
-const ListHeaderSkeleton = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
 `;
 
 const PetDetailSkeleton = styled.div`
@@ -142,6 +109,11 @@ const PetDetailSkeleton = styled.div`
   grid-template-columns: 1fr;
   gap: ${spacing.lg};
   padding-top: ${spacing.lg};
+  
+  @media (max-width: 479px) {
+    gap: ${spacing.md};
+    padding-top: ${spacing.md};
+  }
   
   @media (min-width: 768px) {
     grid-template-columns: 8fr 4fr;
@@ -160,12 +132,20 @@ const PetDetailImageSkeleton = styled.div`
   background-size: 1000px 100%;
   animation: ${shimmer} 2s infinite;
   border-radius: ${borderRadius.lg};
+  
+  @media (max-width: 479px) {
+    aspect-ratio: 16/9;
+  }
 `;
 
 const PetDetailInfoSkeleton = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${spacing.lg};
+  
+  @media (max-width: 479px) {
+    gap: ${spacing.md};
+  }
 `;
 
 const PetDetailTitleSkeleton = styled.div`
@@ -180,6 +160,11 @@ const PetDetailTitleSkeleton = styled.div`
   animation: ${shimmer} 2s infinite;
   border-radius: 4px;
   width: 70%;
+  
+  @media (max-width: 479px) {
+    height: 32px;
+    width: 85%;
+  }
 `;
 
 const PetDetailTagSkeleton = styled.div`
@@ -194,6 +179,11 @@ const PetDetailTagSkeleton = styled.div`
   background-size: 1000px 100%;
   animation: ${shimmer} 2s infinite;
   border-radius: ${borderRadius.full};
+  
+  @media (max-width: 479px) {
+    height: 24px;
+    width: 70px;
+  }
 `;
 
 const PetDetailMetadataSkeleton = styled.div`
@@ -203,12 +193,22 @@ const PetDetailMetadataSkeleton = styled.div`
   padding: ${spacing.md};
   background: ${colors.surfaceContainer};
   border-radius: ${borderRadius.lg};
+  
+  @media (max-width: 479px) {
+    grid-template-columns: 1fr;
+    gap: ${spacing.sm};
+    padding: ${spacing.sm};
+  }
 `;
 
 const PetDetailStorySkeleton = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${spacing.sm};
+  
+  @media (max-width: 479px) {
+    gap: ${spacing.xs};
+  }
 `;
 
 const PetDetailActionSkeleton = styled.div`
@@ -223,10 +223,28 @@ const PetDetailActionSkeleton = styled.div`
   animation: ${shimmer} 2s infinite;
   border-radius: ${borderRadius.lg};
   width: 100%;
+  
+  @media (max-width: 479px) {
+    height: 40px;
+  }
+`;
+
+const MobileHide = styled.div`
+  @media (max-width: 479px) {
+    display: none;
+  }
+`;
+
+const MobileCompact = styled.div`
+  @media (max-width: 479px) {
+    & > div:last-child {
+      display: none;
+    }
+  }
 `;
 
 interface LoadingSkeletonProps {
-  variant?: 'card' | 'text' | 'image' | 'list' | 'petDetail';
+  variant?: 'card' | 'text' | 'petDetail';
   width?: string;
   height?: string;
   count?: number;
@@ -262,31 +280,6 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
     );
   }
 
-  if (variant === 'list') {
-    return (
-      <>
-        {Array.from({ length: count }).map((_, index) => (
-          <ListSkeleton key={index}>
-            <ListImageSkeleton />
-            <ListContentSkeleton>
-              <ListHeaderSkeleton>
-                <SkeletonBase width="60%" height="20px" />
-                <SkeletonBase width="24px" height="24px" />
-              </ListHeaderSkeleton>
-              <SkeletonBase width="100%" height="14px" />
-              <SkeletonBase width="100%" height="14px" />
-              <div style={{ display: 'flex', gap: spacing.md, marginTop: 'auto' }}>
-                <SkeletonBase width="80px" height="12px" />
-                <SkeletonBase width="80px" height="12px" />
-                <SkeletonBase width="60px" height="12px" />
-              </div>
-            </ListContentSkeleton>
-          </ListSkeleton>
-        ))}
-      </>
-    );
-  }
-
   if (variant === 'petDetail') {
     return (
       <PetDetailSkeleton>
@@ -310,26 +303,32 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
                 <SkeletonBase width="80%" height="16px" />
               </div>
             </div>
-            <div>
-              <SkeletonBase width="60%" height="12px" />
-              <div style={{ marginTop: '4px' }}>
-                <SkeletonBase width="80%" height="16px" />
+            <MobileHide>
+              <div>
+                <SkeletonBase width="60%" height="12px" />
+                <div style={{ marginTop: '4px' }}>
+                  <SkeletonBase width="80%" height="16px" />
+                </div>
               </div>
-            </div>
-            <div>
-              <SkeletonBase width="60%" height="12px" />
-              <div style={{ marginTop: '4px' }}>
-                <SkeletonBase width="80%" height="16px" />
+            </MobileHide>
+            <MobileHide>
+              <div>
+                <SkeletonBase width="60%" height="12px" />
+                <div style={{ marginTop: '4px' }}>
+                  <SkeletonBase width="80%" height="16px" />
+                </div>
               </div>
-            </div>
+            </MobileHide>
           </PetDetailMetadataSkeleton>
-          <PetDetailStorySkeleton>
-            <SkeletonBase width="40%" height="20px" />
-            <SkeletonBase width="100%" height="14px" />
-            <SkeletonBase width="100%" height="14px" />
-            <SkeletonBase width="100%" height="14px" />
-            <SkeletonBase width="80%" height="14px" />
-          </PetDetailStorySkeleton>
+          <MobileCompact>
+            <PetDetailStorySkeleton>
+              <SkeletonBase width="40%" height="20px" />
+              <SkeletonBase width="100%" height="14px" />
+              <SkeletonBase width="100%" height="14px" />
+              <SkeletonBase width="100%" height="14px" />
+              <SkeletonBase width="80%" height="14px" />
+            </PetDetailStorySkeleton>
+          </MobileCompact>
           <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
             <PetDetailActionSkeleton />
             <div style={{ display: 'flex', gap: spacing.sm }}>

@@ -19,12 +19,18 @@ const Container = styled.div<{ isVisible: boolean }>`
   right: 0;
   z-index: ${zIndex.sticky};
   padding: ${spacing.md};
+  padding-bottom: calc(${spacing.md} + 60px);
   pointer-events: none;
   display: flex;
   justify-content: center;
   
+  @media (min-width: 768px) and (max-width: 1023px) {
+    bottom: 72px;
+  }
+  
   @media (min-width: 768px) {
     padding: ${spacing.gutter};
+    padding-bottom: ${spacing.gutter};
   }
   
   ${props => props.isVisible && `
@@ -50,12 +56,26 @@ const Pill = styled.div`
   -webkit-backdrop-filter: blur(${glass.blurHeavy});
   color: ${colors.inverseOnSurface};
   border-radius: ${borderRadius.xl};
-  padding: 14px;
+  padding: ${spacing.sm};
   box-shadow: ${elevation.level3};
   display: inline-flex;
   align-items: center;
-  gap: ${spacing.lg};
+  gap: ${spacing.sm};
   border: 1px solid ${colors.outlineVariant}20;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  
+  @media (min-width: 480px) {
+    padding: 12px;
+    gap: ${spacing.md};
+    width: auto;
+  }
+  
+  @media (min-width: 768px) {
+    padding: 14px;
+    gap: ${spacing.lg};
+  }
 `;
 
 const SelectionInfo = styled.div`
@@ -64,6 +84,12 @@ const SelectionInfo = styled.div`
   gap: ${spacing.sm};
   padding-right: ${spacing.lg};
   border-right: 1px solid ${colors.outline}30;
+  flex-shrink: 0;
+  
+  @media (max-width: 479px) {
+    padding-right: ${spacing.sm};
+    gap: ${spacing.xs};
+  }
 `;
 
 const CountIndicator = styled.div`
@@ -78,36 +104,77 @@ const CountIndicator = styled.div`
   font-weight: 700;
   font-size: ${typography.label.medium.fontSize};
   font-family: ${typography.label.medium.fontFamily};
+  
+  @media (max-width: 479px) {
+    width: 28px;
+    height: 28px;
+    font-size: ${typography.label.small.fontSize};
+  }
 `;
 
 const SelectionText = styled.span`
   font-size: ${typography.label.medium.fontSize};
   font-weight: ${typography.label.medium.fontWeight};
   font-family: ${typography.label.medium.fontFamily};
+  
+  @media (max-width: 479px) {
+    font-size: ${typography.label.small.fontSize};
+  }
 `;
 
 const Actions = styled.div`
   display: flex;
   align-items: center;
-  gap: ${spacing.md};
+  justify-content: flex-end;
+  gap: ${spacing.sm};
   flex: 1;
+  min-width: 0;
+  
+  @media (min-width: 768px) {
+    gap: ${spacing.md};
+  }
+  
+  @media (max-width: 479px) {
+    gap: 4px;
+  }
 `;
 
 const DownloadButton = styled.button`
   background: ${gradients.primary};
   color: ${colors.onPrimary};
   font-weight: 800;
-  padding: 12px 32px;
+  padding: 10px 20px;
   border-radius: ${borderRadius.xl};
   display: flex;
   align-items: center;
-  gap: ${spacing.sm};
+  gap: ${spacing.xs};
   border: none;
   cursor: pointer;
   transition: ${transitions.default};
-  font-size: ${typography.label.medium.fontSize};
+  font-size: ${typography.label.small.fontSize};
   font-family: ${typography.label.medium.fontFamily};
   box-shadow: ${elevation.level1};
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  @media (min-width: 768px) {
+    padding: 12px 32px;
+    gap: ${spacing.sm};
+    font-size: ${typography.label.medium.fontSize};
+  }
+
+  @media (max-width: 479px) {
+    padding: 6px 10px;
+    gap: 2px;
+    
+    & span:first-child {
+      font-size: 16px;
+    }
+    
+    & span:last-child {
+      display: none;
+    }
+  }
 
   &:hover {
     transform: translateY(-2px);
@@ -127,12 +194,21 @@ const DownloadButton = styled.button`
 const ClearButton = styled.button`
   background: none;
   color: ${colors.onPrimaryContainer};
-  font-size: ${typography.label.medium.fontSize};
+  font-size: ${typography.label.small.fontSize};
   font-weight: ${typography.label.medium.fontWeight};
   font-family: ${typography.label.medium.fontFamily};
   border: none;
   cursor: pointer;
   padding: 0;
+  white-space: nowrap;
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.label.medium.fontSize};
+  }
+  
+  @media (max-width: 479px) {
+    display: none;
+  }
   
   &:hover {
     text-decoration: underline;
@@ -142,13 +218,35 @@ const ClearButton = styled.button`
 const SelectAllButton = styled.button`
   background: none;
   color: ${colors.onPrimaryContainer};
-  font-size: ${typography.label.medium.fontSize};
+  font-size: ${typography.label.small.fontSize};
   font-weight: ${typography.label.medium.fontWeight};
   font-family: ${typography.label.medium.fontFamily};
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-right: ${spacing.md};
+  margin-right: ${spacing.sm};
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: ${spacing.xs};
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.label.medium.fontSize};
+    margin-right: ${spacing.md};
+  }
+  
+  @media (max-width: 479px) {
+    padding: 6px;
+    margin-right: 2px;
+    
+    & span:first-child {
+      font-size: 16px;
+    }
+    
+    & span:last-child {
+      display: none;
+    }
+  }
   
   &:hover {
     text-decoration: underline;
@@ -156,7 +254,7 @@ const SelectAllButton = styled.button`
 `;
 
 const CloseButton = styled.button`
-display: flex;
+  display: flex;
   margin-left: ${spacing.sm};
   padding: 4px;
   border-radius: ${borderRadius.full};
@@ -165,6 +263,15 @@ display: flex;
   color: ${colors.inverseOnSurface};
   cursor: pointer;
   transition: ${transitions.default};
+  
+  @media (max-width: 479px) {
+    margin-left: 2px;
+    padding: 6px;
+    
+    & span {
+      font-size: 16px;
+    }
+  }
   
   &:hover {
     background: ${colors.surfaceVariant}20;
@@ -206,7 +313,8 @@ export const SelectionControls: React.FC<SelectionControlsProps> = ({
         <Actions>
           {onSelectAll && totalItems && selectedCount < totalItems && (
             <SelectAllButton onClick={onSelectAll}>
-              Select All ({totalItems})
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>select_all</span>
+              <span>All</span>
             </SelectAllButton>
           )}
 
@@ -214,12 +322,12 @@ export const SelectionControls: React.FC<SelectionControlsProps> = ({
             onClick={onDownload}
             disabled={isDownloading}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: typography.label.medium.fontSize }}>download</span>
-            Download Selected
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
+            <span>Download</span>
           </DownloadButton>
 
           <ClearButton onClick={onClearSelection}>
-            Clear Selection
+            Clear
           </ClearButton>
         </Actions>
 

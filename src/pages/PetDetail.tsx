@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { colors, typography, spacing, borderRadius, elevation, transitions, breakpoints, gradients } from '../theme';
@@ -15,10 +15,12 @@ const PetDetailContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   gap: ${spacing.lg};
-  padding-top: ${spacing.lg};
+  padding: ${spacing.sm};
   
   @media (min-width: ${breakpoints.tablet}) {
     grid-template-columns: 8fr 4fr;
+    gap: ${spacing.lg};
+    padding: ${spacing.lg};
   }
 `;
 
@@ -35,39 +37,60 @@ const MainImage = styled.img`
   object-fit: cover;
   border-radius: ${borderRadius.lg};
   box-shadow: ${elevation.level2};
+  
+  @media (max-width: ${breakpoints.tablet}) {
+    aspect-ratio: 1/1;
+  }
 `;
 
 const InfoSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${spacing.lg};
+  gap: ${spacing.md};
   
   @media (min-width: ${breakpoints.tablet}) {
     grid-column: 2;
+    gap: ${spacing.lg};
   }
 `;
 
 const PetName = styled.h1`
-  font-size: ${typography.headline.large.fontSize};
-  font-weight: ${typography.headline.large.fontWeight};
+  font-size: 26px;
+  font-weight: 700;
   font-family: ${typography.headline.large.fontFamily};
   color: ${colors.onSurface};
+  line-height: 1.2;
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    font-size: ${typography.headline.large.fontSize};
+    font-weight: ${typography.headline.large.fontWeight};
+  }
 `;
 
 const TagContainer = styled.div`
   display: flex;
   gap: ${spacing.sm};
   flex-wrap: wrap;
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    gap: ${spacing.sm};
+  }
 `;
 
 const Tag = styled.span`
-  padding: ${spacing.xs} ${spacing.sm};
+  padding: 6px 12px;
   background: ${colors.primaryContainer};
   color: ${colors.onPrimaryContainer};
   border-radius: ${borderRadius.full};
-  font-size: ${typography.label.medium.fontSize};
-  font-weight: ${typography.label.medium.fontWeight};
+  font-size: 12px;
+  font-weight: 600;
   font-family: ${typography.label.medium.fontFamily};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    padding: ${spacing.xs} ${spacing.sm};
+    font-size: ${typography.label.medium.fontSize};
+    font-weight: ${typography.label.medium.fontWeight};
+  }
 `;
 
 const MetadataGrid = styled.div`
@@ -79,6 +102,16 @@ const MetadataGrid = styled.div`
   border-radius: ${borderRadius.lg};
   border: 1px solid ${colors.outlineVariant}20;
   box-shadow: ${elevation.level1};
+  
+  @media (min-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    grid-template-columns: 1fr 1fr;
+    gap: ${spacing.md};
+    padding: ${spacing.md};
+  }
 `;
 
 const MetadataItem = styled.div`
@@ -88,70 +121,65 @@ const MetadataItem = styled.div`
 `;
 
 const MetadataLabel = styled.span`
-  font-size: ${typography.label.small.fontSize};
-  font-weight: ${typography.label.small.fontWeight};
+  font-size: 11px;
+  font-weight: 600;
   font-family: ${typography.label.small.fontFamily};
   color: ${colors.onSurfaceVariant};
   text-transform: uppercase;
   letter-spacing: 0.05em;
-`;
-
-const MetadataValue = styled.span`
-  font-size: ${typography.body.medium.fontSize};
-  font-weight: ${typography.body.medium.fontWeight};
-  font-family: ${typography.body.medium.fontFamily};
-  color: ${colors.onSurface};
-`;
-
-const BreadcrumbNav = styled.nav`
-  display: flex;
-  align-items: center;
-  gap: ${spacing.xs};
-  font-size: ${typography.label.small.fontSize};
-  font-weight: ${typography.label.small.fontWeight};
-  font-family: ${typography.label.small.fontFamily};
-  color: ${colors.onSurfaceVariant};
-  margin-bottom: ${spacing.sm};
-`;
-
-const BreadcrumbLink = styled.a`
-  color: ${colors.onSurfaceVariant};
-  text-decoration: none;
   
-  &:hover {
-    color: ${colors.primary};
+  @media (min-width: ${breakpoints.tablet}) {
+    font-size: ${typography.label.small.fontSize};
+    font-weight: ${typography.label.small.fontWeight};
   }
 `;
 
-const BreadcrumbSeparator = styled.span`
-  color: ${colors.onSurfaceVariant};
+const MetadataValue = styled.span`
   font-size: 14px;
-`;
-
-const BreadcrumbCurrent = styled.span`
-  color: ${colors.primary};
-  font-weight: ${typography.label.small.fontWeight};
+  font-weight: 500;
+  font-family: ${typography.body.medium.fontFamily};
+  color: ${colors.onSurface};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    font-size: ${typography.body.medium.fontSize};
+    font-weight: ${typography.body.medium.fontWeight};
+  }
 `;
 
 const StorySection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${spacing.sm};
+  gap: ${spacing.xs};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    gap: ${spacing.sm};
+  }
 `;
 
 const StoryTitle = styled.h2`
-  font-size: ${typography.headline.medium.fontSize};
-  font-weight: ${typography.headline.medium.fontWeight};
+  font-size: 18px;
+  font-weight: 600;
   font-family: ${typography.headline.medium.fontFamily};
   color: ${colors.onSurface};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    font-size: ${typography.headline.medium.fontSize};
+    font-weight: ${typography.headline.medium.fontWeight};
+  }
 `;
 
 const StoryText = styled.p`
-  font-size: ${typography.body.medium.fontSize};
-  font-weight: ${typography.body.medium.fontWeight};
+  font-size: 14px;
+  font-weight: 400;
   font-family: ${typography.body.medium.fontFamily};
   color: ${colors.onSurface};
-  line-height: 1.6;
+  line-height: 1.5;
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    font-size: ${typography.body.medium.fontSize};
+    font-weight: ${typography.body.medium.fontWeight};
+    line-height: 1.6;
+  }
 `;
 
 const ActionButtons = styled.div`
@@ -166,8 +194,9 @@ const ActionButtons = styled.div`
 
 const MobileActionButtons = styled.div`
   display: flex;
-  gap: ${spacing.sm};
+  gap: ${spacing.md};
   margin-top: ${spacing.md};
+  justify-content: space-between;
   
   @media (min-width: ${breakpoints.tablet}) {
     display: none;
@@ -177,21 +206,31 @@ const MobileActionButtons = styled.div`
 const ActionButton = styled.button.withConfig({
   shouldForwardProp: (prop) => prop !== 'variant',
 }) <{ variant?: 'primary' | 'secondary' }>`
-  padding: ${spacing.sm} ${spacing.md};
+  padding: 10px 16px;
   border-radius: ${borderRadius.lg};
   border: none;
-  font-size: ${typography.label.medium.fontSize};
-  font-weight: ${typography.label.medium.fontWeight};
+  font-size: 14px;
+  font-weight: 600;
   font-family: ${typography.label.medium.fontFamily};
   cursor: pointer;
   transition: ${transitions.default};
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: ${spacing.xs};
+  min-height: 40px;
+  flex: 1;
 
   background: ${props => props.variant === 'primary' ? gradients.primary : props.variant === 'secondary' ? 'transparent' : colors.surfaceContainerHigh};
   color: ${props => props.variant === 'primary' ? colors.onPrimary : props.variant === 'secondary' ? colors.primary : colors.onSurface};
   border: ${props => props.variant === 'secondary' ? `2px solid ${colors.primary}` : 'none'};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    padding: ${spacing.sm} ${spacing.md};
+    font-size: ${typography.label.medium.fontSize};
+    font-weight: ${typography.label.medium.fontWeight};
+    min-height: 44px;
+  }
 
   &:hover {
     background: ${props => props.variant === 'primary' ? gradients.primary : props.variant === 'secondary' ? `${colors.primary}10` : colors.surfaceContainerHover};
@@ -205,42 +244,76 @@ const ActionButton = styled.button.withConfig({
 `;
 
 const CollectionSection = styled.div`
-  margin-top: ${spacing.xl};
+  margin-top: ${spacing.lg};
+  padding: ${spacing.sm};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    margin-top: ${spacing.xl};
+    padding: 0;
+  }
 `;
 
 const CollectionHeader = styled.div`
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: ${spacing.lg};
+  align-items: center;
+  gap: ${spacing.sm};
+  margin-bottom: ${spacing.md};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    align-items: flex-end;
+    margin-bottom: ${spacing.lg};
+  }
 `;
 
 const CollectionTitleSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${spacing.xs};
+  width: 100%;
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    width: auto;
+  }
 `;
 
 const CollectionSubtitle = styled.p`
-  font-size: ${typography.body.medium.fontSize};
-  font-weight: ${typography.body.medium.fontWeight};
+  font-size: 13px;
+  font-weight: 400;
   font-family: ${typography.body.medium.fontFamily};
   color: ${colors.onSurfaceVariant};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    font-size: ${typography.body.medium.fontSize};
+    font-weight: ${typography.body.medium.fontWeight};
+  }
 `;
 
 const CollectionTitle = styled.h2`
-  font-size: ${typography.headline.medium.fontSize};
-  font-weight: ${typography.headline.medium.fontWeight};
+  font-size: 18px;
+  font-weight: 600;
   font-family: ${typography.headline.medium.fontFamily};
   color: ${colors.onSurface};
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    font-size: ${typography.headline.medium.fontSize};
+    font-weight: ${typography.headline.medium.fontWeight};
+  }
 `;
 
 const ViewAllLink = styled.a`
   color: ${colors.primary};
-  font-size: ${typography.body.medium.fontSize};
-  font-weight: ${typography.body.medium.fontWeight};
+  font-size: 13px;
+  font-weight: 500;
   font-family: ${typography.body.medium.fontFamily};
   text-decoration: none;
+  white-space: nowrap;
+  
+  @media (min-width: ${breakpoints.tablet}) {
+    font-size: ${typography.body.medium.fontSize};
+    font-weight: ${typography.body.medium.fontWeight};
+  }
   
   &:hover {
     text-decoration: underline;
@@ -249,7 +322,7 @@ const ViewAllLink = styled.a`
 
 const RelatedGrid = styled.div`
   display: grid;
-  gap: ${spacing.md};
+  gap: ${spacing.sm};
   align-items: stretch;
 
   /* Mobile: 1 column */
@@ -307,7 +380,6 @@ const PetDetail: React.FC = () => {
   const navigate = useNavigate();
   const { pets, loading, selectedIds, toggleSelection } = useSelection();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const [searchQuery, setSearchQuery] = useState('');
 
   const pet = useMemo(() => {
     const foundPet = pets.find(p => p.id === id);
@@ -326,16 +398,6 @@ const PetDetail: React.FC = () => {
     if (!pet) return;
     const filename = `${pet.title.replace(/[^a-z0-9]/gi, "_")}.jpg`;
     await downloadImage(pet.originalUrl || pet.url, filename);
-  };
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  const handleSearchSubmit = (query: string) => {
-    if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
-    }
   };
 
   const handleFavorite = (e?: React.MouseEvent) => {
@@ -367,8 +429,8 @@ const PetDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <Navigation searchValue={searchQuery} onSearchChange={handleSearchChange} onSearchSubmit={handleSearchSubmit}>
-        <div style={{ padding: spacing.xl }}>
+      <Navigation>
+        <div>
           <LoadingSkeleton variant="petDetail" />
         </div>
       </Navigation>
@@ -377,7 +439,7 @@ const PetDetail: React.FC = () => {
 
   if (!pet) {
     return (
-      <Navigation searchValue={searchQuery} onSearchChange={handleSearchChange} onSearchSubmit={handleSearchSubmit}>
+      <Navigation>
         <div style={{ padding: spacing.xl }}>Pet not found</div>
       </Navigation>
     );
@@ -385,38 +447,35 @@ const PetDetail: React.FC = () => {
 
 
   return (
-    <Navigation searchValue={searchQuery} onSearchChange={handleSearchChange} onSearchSubmit={handleSearchSubmit}>
+    <Navigation>
       <PetDetailContainer>
         <ImageSection>
           <MainImage src={pet.originalUrl || pet.url} alt={pet.title} />
           <MobileActionButtons>
-            <ActionButton variant="primary" onClick={handleDownload} style={{ flex: 1 }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>download</span>
+            <ActionButton variant="secondary" onClick={handleShare}>
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>share</span>
+              Share
+            </ActionButton>
+            <ActionButton variant="primary" onClick={handleDownload}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
               Download
             </ActionButton>
+          </MobileActionButtons>
+        </ImageSection>
+
+        <InfoSection>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm }}>
+            <PetName>{pet.title}</PetName>
             <div
               onClick={handleFavorite}
               style={{
-                flex: 1,
+                background: colors.surfaceContainer,
+                borderRadius: borderRadius.full,
+                padding: spacing.sm,
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: spacing.xs,
-                padding: `${spacing.sm} ${spacing.md}`,
-                borderRadius: borderRadius.lg,
-                border: `2px solid ${colors.primary}`,
-                background: 'transparent',
-                color: colors.primary,
-                cursor: 'pointer',
-                transition: transitions.default,
-                fontWeight: 500,
-                fontSize: typography.label.medium.fontSize
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = `${colors.primary}10`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
+                justifyContent: 'center'
               }}
             >
               <FavoriteButton
@@ -425,29 +484,12 @@ const PetDetail: React.FC = () => {
                 ariaLabel={isFavorite(pet.id) ? 'Remove from favorites' : 'Add to favorites'}
                 variant="inline"
               />
-              Favorite
             </div>
-            <ActionButton variant="secondary" onClick={handleShare} style={{ width: spacing.xl }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>share</span>
-            </ActionButton>
-          </MobileActionButtons>
-        </ImageSection>
-
-        <InfoSection>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
-            <BreadcrumbNav>
-              <BreadcrumbLink href="#" onClick={(e) => { e.preventDefault(); navigate('/'); }}>Gallery</BreadcrumbLink>
-              <BreadcrumbSeparator className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>chevron_right</BreadcrumbSeparator>
-              <BreadcrumbLink href="#" onClick={(e) => { e.preventDefault(); }}>{pet.type}s</BreadcrumbLink>
-              <BreadcrumbSeparator className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>chevron_right</BreadcrumbSeparator>
-              <BreadcrumbCurrent>{pet.breed}</BreadcrumbCurrent>
-            </BreadcrumbNav>
-            <PetName>{pet.title}</PetName>
-            <TagContainer>
-              <Tag>{pet.type}</Tag>
-              <Tag>{pet.breed}</Tag>
-            </TagContainer>
           </div>
+          <TagContainer>
+            <Tag>{pet.type}</Tag>
+            <Tag>{pet.breed}</Tag>
+          </TagContainer>
 
           <MetadataGrid>
             <MetadataItem>
@@ -469,14 +511,14 @@ const PetDetail: React.FC = () => {
           </MetadataGrid>
 
           <StorySection>
-            <StoryTitle>Story</StoryTitle>
+            <StoryTitle>About</StoryTitle>
             <StoryText>{pet.story}</StoryText>
           </StorySection>
 
           <ActionButtons>
             <ActionButton variant="primary" onClick={handleDownload}>
-              <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>download</span>
-              Download Original
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
+              <span>Download</span>
             </ActionButton>
             <div style={{ display: 'flex', gap: spacing.sm }}>
               <div

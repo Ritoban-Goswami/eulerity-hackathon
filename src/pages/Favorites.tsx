@@ -1,74 +1,128 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { colors, typography, spacing } from '../theme';
+import styled, { keyframes } from 'styled-components';
+import { colors, typography, spacing, borderRadius, gradients } from '../theme';
 import { Navigation } from '../components/Layout/Navigation';
 import { GalleryGrid } from '../components/GalleryGrid';
 import { SelectionControls } from '../components/SelectionControls';
 import { useSelection } from '../contexts/SelectionContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { downloadSelectedImages } from '../utils/download';
-import { useNavigate } from 'react-router-dom';
 
 const FavoritesContainer = styled.div`
-  padding: ${spacing.xl};
+  padding: ${spacing.sm};
   max-width: 1400px;
   margin: 0 auto;
+  
+  @media (min-width: 768px) {
+    padding: ${spacing.xl};
+  }
 `;
 
 const FavoritesHeader = styled.div`
-  margin-bottom: ${spacing.xl};
+  margin-bottom: ${spacing.md};
+  
+  @media (min-width: 768px) {
+    margin-bottom: ${spacing.xl};
+  }
 `;
 
 const FavoritesTitle = styled.h1`
-  font-size: ${typography.display.fontSize};
-  font-weight: ${typography.display.fontWeight};
+  font-size: 24px;
+  font-weight: 700;
   font-family: ${typography.display.fontFamily};
-  color: ${colors.primary};
+  background: ${gradients.primary};
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 ${spacing.sm} 0;
-  line-height: 1.1;
+  line-height: 1.2;
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.display.fontSize};
+    font-weight: ${typography.display.fontWeight};
+    line-height: 1.1;
+  }
 `;
 
 const FavoritesSubtitle = styled.p`
-  font-size: ${typography.body.large.fontSize};
-  font-weight: ${typography.body.large.fontWeight};
-  font-family: ${typography.body.large.fontFamily};
+  font-size: 13px;
+  font-weight: 400;
+  font-family: ${typography.body.medium.fontFamily};
   color: ${colors.onSurfaceVariant};
   margin: 0;
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.body.large.fontSize};
+    font-weight: ${typography.body.large.fontWeight};
+  }
 `;
 
 const EmptyFavorites = styled.div`
   text-align: center;
-  padding: ${spacing.xl} ${spacing.lg};
+  padding: ${spacing.lg} ${spacing.md};
+  background: ${colors.surfaceContainer};
+  border-radius: ${borderRadius.xl};
+  border: 1px solid ${colors.outlineVariant}20;
+  
+  @media (min-width: 768px) {
+    padding: ${spacing.xl} ${spacing.lg};
+  }
+`;
+
+const float = keyframes`
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 `;
 
 const EmptyIcon = styled.div`
-  font-size: 64px;
-  margin-bottom: ${spacing.lg};
-  color: ${colors.outlineVariant};
+  font-size: 40px;
+  margin-bottom: ${spacing.sm};
+  color: ${colors.primary};
+  animation: ${float} 3s ease-in-out infinite;
+  
+  @media (min-width: 768px) {
+    font-size: 64px;
+    margin-bottom: ${spacing.lg};
+  }
 `;
 
 const EmptyTitle = styled.h2`
-  font-size: ${typography.headline.large.fontSize};
-  font-weight: ${typography.headline.large.fontWeight};
+  font-size: 18px;
+  font-weight: 600;
   font-family: ${typography.headline.large.fontFamily};
   color: ${colors.onSurface};
   margin: 0 0 ${spacing.sm} 0;
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.headline.large.fontSize};
+    font-weight: ${typography.headline.large.fontWeight};
+  }
 `;
 
 const EmptyMessage = styled.p`
-  font-size: ${typography.body.large.fontSize};
-  font-weight: ${typography.body.large.fontWeight};
-  font-family: ${typography.body.large.fontFamily};
+  font-size: 13px;
+  font-weight: 400;
+  font-family: ${typography.body.medium.fontFamily};
   color: ${colors.onSurfaceVariant};
   margin: 0;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  
+  @media (min-width: 768px) {
+    font-size: ${typography.body.large.fontSize};
+    font-weight: ${typography.body.large.fontWeight};
+  }
 `;
 
 export const Favorites: React.FC = () => {
   const { pets, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, clearSelection, selectAll } = useSelection();
   const { favoriteIds } = useFavorites();
   const [isDownloading, setIsDownloading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
 
   const favoritePets = pets.filter(pet => favoriteIds.has(pet.id));
 
@@ -88,25 +142,15 @@ export const Favorites: React.FC = () => {
     selectAll(favoritePets);
   };
 
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  const handleSearchSubmit = (query: string) => {
-    if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
-    }
-  };
-
   return (
-    <Navigation searchValue={searchQuery} onSearchChange={handleSearchChange} onSearchSubmit={handleSearchSubmit}>
+    <Navigation>
       <FavoritesContainer>
         <FavoritesHeader>
-          <FavoritesTitle>Your Favorites</FavoritesTitle>
+          <FavoritesTitle>Your Collection</FavoritesTitle>
           <FavoritesSubtitle>
             {favoritePets.length === 0
-              ? 'You haven\'t favorited any pets yet'
-              : `${favoritePets.length} ${favoritePets.length === 1 ? 'pet' : 'pets'} in your collection`
+              ? 'Start curating your favorite pets'
+              : `${favoritePets.length} ${favoritePets.length === 1 ? 'pet' : 'pets'} saved`
             }
           </FavoritesSubtitle>
         </FavoritesHeader>
@@ -114,13 +158,13 @@ export const Favorites: React.FC = () => {
         {favoritePets.length === 0 ? (
           <EmptyFavorites>
             <EmptyIcon>
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: 'FILL 0' }}>
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: 'FILL 1' }}>
                 favorite
               </span>
             </EmptyIcon>
-            <EmptyTitle>No favorites yet</EmptyTitle>
+            <EmptyTitle>Your collection is empty</EmptyTitle>
             <EmptyMessage>
-              Start building your collection by clicking the heart icon on any pet
+              Tap the heart icon on any pet to save it here and build your personal collection
             </EmptyMessage>
           </EmptyFavorites>
         ) : (

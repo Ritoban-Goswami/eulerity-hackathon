@@ -16,16 +16,22 @@ interface CustomDropdownProps {
 
 const DropdownContainer = styled.div`
   position: relative;
-  width: 200px;
+  width: 100%;
+  min-width: 120px;
+  
+  @media (min-width: 768px) {
+    width: 180px;
+    min-width: 150px;
+  }
 `;
 
 const DropdownButton = styled.button<{ $isOpen: boolean }>`
   width: 100%;
-  padding: 8px 16px;
+  padding: 8px 12px;
   background: ${colors.surfaceContainer};
   border: 1px solid ${colors.outlineVariant};
   border-radius: ${borderRadius.lg};
-  font-size: ${typography.label.medium.fontSize};
+  font-size: 13px;
   font-family: ${typography.label.medium.fontFamily};
   color: ${colors.onSurface};
   cursor: pointer;
@@ -34,6 +40,13 @@ const DropdownButton = styled.button<{ $isOpen: boolean }>`
   justify-content: space-between;
   transition: ${transitions.default};
   outline: none;
+  min-height: 36px;
+  
+  @media (min-width: 768px) {
+    padding: 8px 16px;
+    font-size: ${typography.label.medium.fontSize};
+    min-height: auto;
+  }
 
   &:hover {
     background: ${colors.surfaceContainerHigh};
@@ -54,6 +67,7 @@ const DropdownButton = styled.button<{ $isOpen: boolean }>`
 const DropdownIcon = styled.span<{ $isOpen: boolean }>`
   transition: transform 0.2s ease;
   transform: ${props => props.$isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
+  display: flex;
 `;
 
 const DropdownMenu = styled.div<{ $isOpen: boolean }>`
@@ -72,20 +86,31 @@ const DropdownMenu = styled.div<{ $isOpen: boolean }>`
   transition: all 0.2s ease;
   max-height: 300px;
   overflow-y: auto;
+  
+  @media (max-width: 767px) {
+    max-height: 250px;
+  }
 `;
 
 const DropdownOption = styled.button<{ $isSelected: boolean }>`
   width: 100%;
-  padding: 10px 16px;
+  padding: 10px 12px;
   background: ${props => props.$isSelected ? colors.primaryContainer : 'transparent'};
   color: ${props => props.$isSelected ? colors.onPrimaryContainer : colors.onSurface};
   border: none;
   text-align: left;
-  font-size: ${typography.label.medium.fontSize};
+  font-size: 13px;
   font-family: ${typography.label.medium.fontFamily};
   cursor: pointer;
   transition: ${transitions.default};
   outline: none;
+  min-height: 36px;
+  
+  @media (min-width: 768px) {
+    padding: 10px 16px;
+    font-size: ${typography.label.medium.fontSize};
+    min-height: auto;
+  }
 
   &:hover {
     background: ${props => props.$isSelected ? colors.primaryContainer : colors.surfaceContainerHigh};
@@ -148,7 +173,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, 
       >
         <span>{selectedOption?.label || label || 'Select...'}</span>
         <DropdownIcon $isOpen={isOpen}>
-          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
             expand_more
           </span>
         </DropdownIcon>
