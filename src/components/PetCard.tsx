@@ -6,6 +6,7 @@ import type { Pet } from '../types/pet';
 import { FavoriteButton } from './FavoriteButton';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { getColorCategory } from '../utils/imageAnalysis';
+import { formatDate } from '../utils/date';
 
 interface PetCardProps {
   pet: Pet;
@@ -256,22 +257,6 @@ const Title = styled.h3`
   }
 `;
 
-const BreedBadge = styled.span`
-  background: ${colors.primary}10;
-  color: ${colors.primary};
-  font-size: 9px;
-  text-transform: uppercase;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: ${borderRadius.full};
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  
-  @media (min-width: 768px) {
-    font-size: 10px;
-    padding: 2px 8px;
-  }
-`;
 
 const Description = styled.p`
   font-size: 13px;
@@ -314,32 +299,6 @@ const MetadataItem = styled.span`
   gap: ${spacing.xs};
 `;
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-};
-
-const extractBreed = (title: string) => {
-  // Simple breed extraction - in real app, this would come from the data
-  const breeds = ['Golden Retriever', 'Tabby', 'Bulldog', 'Persian', 'Siamese', 'Poodle', 'Labrador'];
-  const found = breeds.find(breed => title.toLowerCase().includes(breed.toLowerCase()));
-  return found || 'Unknown';
-};
-
-const formatFileSize = (petId: string) => {
-  // Mock file size - in real app, this would come from the data
-  // Use petId to generate consistent "random" size
-  const sizes = ['20MP', '24MP', '42MP', '61MP'];
-  const hash = petId.split('').reduce((a, b) => {
-    a = ((a << 5) - a) + b.charCodeAt(0);
-    return a & a;
-  }, 0);
-  return sizes[Math.abs(hash) % sizes.length];
-};
-
 export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, onToggleSelection, link = false, colorAnalysisLoading = false }) => {
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -353,9 +312,8 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
     }
   };
 
-  const handleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
+  const handleFavorite = (e?: React.MouseEvent) => {
+    e?.preventDefault();
     toggleFavorite(pet.id);
   };
 
@@ -370,8 +328,6 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
     }
   };
 
-  const breed = extractBreed(pet.title);
-  const fileSize = formatFileSize(pet.id);
 
   const cardContent = (
     <>
@@ -416,17 +372,12 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
       <Content className="card-content">
         <Header>
           <Title>{pet.title}</Title>
-          <BreedBadge>{breed.replace(' ', '')}</BreedBadge>
         </Header>
         <Description>{pet.description}</Description>
         <Metadata>
           <MetadataItem>
             <span className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>calendar_today</span>
             {formatDate(pet.created)}
-          </MetadataItem>
-          <MetadataItem>
-            <span className="material-symbols-outlined" style={{ fontSize: typography.label.small.fontSize }}>photo_camera</span>
-            {fileSize}
           </MetadataItem>
         </Metadata>
       </Content>

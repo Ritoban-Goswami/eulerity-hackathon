@@ -1,15 +1,21 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { colors, typography, spacing, borderRadius, elevation, transitions, breakpoints, gradients } from '../theme';
+import { colors, typography, spacing, borderRadius, elevation, transitions, breakpoints } from '../theme';
 import { Navigation } from '../components/Layout/Navigation';
 import { PetCard } from '../components/PetCard';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
+import { Button } from '../components/Button';
+import { SelectionControls } from '../components/SelectionControls';
 import { useSelection } from '../contexts/SelectionContext';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { downloadImage } from '../utils/download';
+import { useDownload } from '../hooks/useDownload';
+import { downloadPetImage } from '../utils/download';
 import { getColorCategory } from '../utils/imageAnalysis';
+import { fetchFileSize, formatFileSize } from '../utils/fileSize';
+import { formatDate } from '../utils/date';
+import { shareContent } from '../utils/share';
 import type { Pet } from '../types/pet';
 
 // Styled Components
@@ -69,31 +75,6 @@ const PetName = styled.h1`
   }
 `;
 
-const TagContainer = styled.div`
-  display: flex;
-  gap: ${spacing.sm};
-  flex-wrap: wrap;
-  
-  @media (min-width: ${breakpoints.tablet}) {
-    gap: ${spacing.sm};
-  }
-`;
-
-const Tag = styled.span`
-  padding: 6px 12px;
-  background: ${colors.primaryContainer};
-  color: ${colors.onPrimaryContainer};
-  border-radius: ${borderRadius.full};
-  font-size: 12px;
-  font-weight: 600;
-  font-family: ${typography.label.medium.fontFamily};
-  
-  @media (min-width: ${breakpoints.tablet}) {
-    padding: ${spacing.xs} ${spacing.sm};
-    font-size: ${typography.label.medium.fontSize};
-    font-weight: ${typography.label.medium.fontWeight};
-  }
-`;
 
 const MetadataGrid = styled.div`
   display: grid;
@@ -186,7 +167,8 @@ const StoryText = styled.p`
 
 const ActionButtons = styled.div`
   display: none;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
   gap: ${spacing.sm};
   
   @media (min-width: ${breakpoints.tablet}) {
@@ -202,46 +184,6 @@ const MobileActionButtons = styled.div`
   
   @media (min-width: ${breakpoints.tablet}) {
     display: none;
-  }
-`;
-
-const ActionButton = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'variant',
-}) <{ variant?: 'primary' | 'secondary' }>`
-  padding: 10px 16px;
-  border-radius: ${borderRadius.lg};
-  border: none;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: ${typography.label.medium.fontFamily};
-  cursor: pointer;
-  transition: ${transitions.default};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${spacing.xs};
-  min-height: 40px;
-  flex: 1;
-
-  background: ${props => props.variant === 'primary' ? gradients.primary : props.variant === 'secondary' ? 'transparent' : colors.surfaceContainerHigh};
-  color: ${props => props.variant === 'primary' ? colors.onPrimary : props.variant === 'secondary' ? colors.primary : colors.onSurface};
-  border: ${props => props.variant === 'secondary' ? `2px solid ${colors.primary}` : 'none'};
-  
-  @media (min-width: ${breakpoints.tablet}) {
-    padding: ${spacing.sm} ${spacing.md};
-    font-size: ${typography.label.medium.fontSize};
-    font-weight: ${typography.label.medium.fontWeight};
-    min-height: 44px;
-  }
-
-  &:hover {
-    background: ${props => props.variant === 'primary' ? gradients.primary : props.variant === 'secondary' ? `${colors.primary}10` : colors.surfaceContainerHover};
-    transform: translateY(-1px);
-    box-shadow: ${elevation.level1};
-  }
-
-  &:active {
-    transform: translateY(0);
   }
 `;
 
@@ -418,27 +360,14 @@ const RelatedGrid = styled.div`
 const getExtendedPetData = (pet: Pet) => {
   // Generate some sample metadata based on the pet
   const metadata = {
-    dateAdded: new Date(pet.created).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    }),
-    resolution: '4000 x 5000 px',
-    fileSize: '4.8 MB',
+    dateAdded: formatDate(pet.created),
     camera: 'Sony a7R IV',
     story: `${pet.title} is a wonderful pet with a unique personality. This adorable companion brings joy and happiness to everyone around. With their charming antics and loving nature, they've become an integral part of the family. Whether it's playtime in the park or cozy evenings at home, this pet knows how to make every moment special. Their favorite activities include playing with toys, exploring the outdoors, and spending quality time with their loved ones.`
   };
 
-  // Extract breed from description or use a default
-  const breedGuess = pet.description.includes('Golden') ? 'Golden Retriever' :
-    pet.description.includes('Lab') ? 'Labrador' :
-      pet.description.includes('Cat') ? 'Persian' :
-        pet.description.includes('Beagle') ? 'Beagle' : 'Mixed Breed';
 
   return {
     ...pet,
-    breed: breedGuess,
-    type: pet.title.toLowerCase().includes('cat') ? 'Cat' : 'Dog',
     ...metadata
   };
 };
@@ -446,13 +375,35 @@ const getExtendedPetData = (pet: Pet) => {
 const PetDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { pets, loading, selectedIds, toggleSelection } = useSelection();
+  const { pets, loading, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, clearSelection, selectAll } = useSelection();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { isDownloading, handleDownload } = useDownload();
+  const [resolution, setResolution] = useState<string>('');
+  const [fileSize, setFileSize] = useState<string>('');
 
   const pet = useMemo(() => {
     const foundPet = pets.find(p => p.id === id);
     return foundPet ? getExtendedPetData(foundPet) : null;
   }, [pets, id]);
+
+  useEffect(() => {
+    if (!pet) return;
+
+    const imageUrl = pet.originalUrl || pet.url;
+
+    // Load image to get resolution
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      setResolution(`${img.naturalWidth} x ${img.naturalHeight} px`);
+    };
+    img.src = imageUrl;
+
+    // Fetch file size using existing utility
+    fetchFileSize(imageUrl).then(bytes => {
+      setFileSize(formatFileSize(bytes));
+    });
+  }, [pet]);
 
   const relatedPets = useMemo(() => {
     if (!pet || pets.length <= 1) return [];
@@ -463,10 +414,17 @@ const PetDetail: React.FC = () => {
     return shuffled.slice(0, 4);
   }, [pet, pets]);
 
-  const handleDownload = async () => {
+  const handleDownloadSelected = () => {
+    handleDownload(selectedPets);
+  };
+
+  const handleSelectAllRelated = () => {
+    selectAll(relatedPets);
+  };
+
+  const handleDownloadSingle = async () => {
     if (!pet) return;
-    const filename = `${pet.title.replace(/[^a-z0-9]/gi, "_")}.jpg`;
-    await downloadImage(pet.originalUrl || pet.url, filename);
+    await downloadPetImage(pet);
   };
 
   const handleFavorite = (e?: React.MouseEvent) => {
@@ -479,21 +437,10 @@ const PetDetail: React.FC = () => {
   };
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: pet?.title,
-          text: pet?.description,
-          url: window.location.href
-        });
-      } catch {
-        // Error sharing - fallback to clipboard copy
-      }
-    } else {
-      // Fallback - copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
+    await shareContent({
+      title: pet?.title,
+      text: pet?.description
+    });
   };
 
   const handleViewSimilarColors = () => {
@@ -530,14 +477,12 @@ const PetDetail: React.FC = () => {
         <ImageSection>
           <MainImage src={pet.originalUrl || pet.url} alt={pet.title} />
           <MobileActionButtons>
-            <ActionButton variant="secondary" onClick={handleShare}>
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>share</span>
+            <Button variant="secondary" size="lg" icon={<span className="material-symbols-outlined" style={{ fontSize: '20px' }}>share</span>} onClick={handleShare} fullWidth>
               Share
-            </ActionButton>
-            <ActionButton variant="primary" onClick={handleDownload}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
+            </Button>
+            <Button variant="primary" size="lg" icon={<span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>} onClick={handleDownloadSingle} fullWidth>
               Download
-            </ActionButton>
+            </Button>
           </MobileActionButtons>
         </ImageSection>
 
@@ -564,10 +509,6 @@ const PetDetail: React.FC = () => {
               />
             </div>
           </div>
-          <TagContainer>
-            <Tag>{pet.type}</Tag>
-            <Tag>{pet.breed}</Tag>
-          </TagContainer>
 
           <MetadataGrid>
             <MetadataItem>
@@ -576,11 +517,11 @@ const PetDetail: React.FC = () => {
             </MetadataItem>
             <MetadataItem>
               <MetadataLabel>Resolution</MetadataLabel>
-              <MetadataValue>{pet.resolution}</MetadataValue>
+              <MetadataValue>{resolution || 'Loading...'}</MetadataValue>
             </MetadataItem>
             <MetadataItem>
               <MetadataLabel>File Size</MetadataLabel>
-              <MetadataValue>{pet.fileSize}</MetadataValue>
+              <MetadataValue>{fileSize || 'Loading...'}</MetadataValue>
             </MetadataItem>
             <MetadataItem>
               <MetadataLabel>Camera</MetadataLabel>
@@ -611,49 +552,12 @@ const PetDetail: React.FC = () => {
           </SimilarColorsButton>
 
           <ActionButtons>
-            <ActionButton variant="primary" onClick={handleDownload}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
-              <span>Download</span>
-            </ActionButton>
-            <div style={{ display: 'flex', gap: spacing.sm }}>
-              <div
-                onClick={handleFavorite}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: spacing.xs,
-                  padding: `${spacing.sm} ${spacing.md}`,
-                  borderRadius: borderRadius.lg,
-                  border: `2px solid ${colors.primary}`,
-                  background: 'transparent',
-                  color: colors.primary,
-                  cursor: 'pointer',
-                  transition: transitions.default,
-                  fontWeight: 500,
-                  fontSize: typography.label.medium.fontSize
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = `${colors.primary}10`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                }}
-              >
-                <FavoriteButton
-                  isFavorite={isFavorite(pet.id)}
-                  onClick={handleFavorite}
-                  ariaLabel={isFavorite(pet.id) ? 'Remove from favorites' : 'Add to favorites'}
-                  variant="inline"
-                />
-                {isFavorite(pet.id) ? 'Favorited' : 'Favorite'}
-              </div>
-              <ActionButton variant="secondary" onClick={handleShare} style={{ flex: 1 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>share</span>
-                Share
-              </ActionButton>
-            </div>
+            <Button variant="secondary" size="lg" icon={<span className="material-symbols-outlined" style={{ fontSize: '24px' }}>share</span>} onClick={handleShare}>
+              Share
+            </Button>
+            <Button variant="primary" size="lg" icon={<span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>} onClick={handleDownloadSingle}>
+              Download
+            </Button>
           </ActionButtons>
         </InfoSection>
       </PetDetailContainer>
@@ -682,6 +586,16 @@ const PetDetail: React.FC = () => {
           </RelatedGrid>
         </CollectionSection>
       )}
+
+      <SelectionControls
+        selectedCount={selectedCount}
+        totalFileSize={totalFileSize}
+        onClearSelection={clearSelection}
+        onDownload={handleDownloadSelected}
+        isDownloading={isDownloading}
+        onSelectAll={handleSelectAllRelated}
+        totalItems={relatedPets.length}
+      />
     </Navigation>
   );
 };

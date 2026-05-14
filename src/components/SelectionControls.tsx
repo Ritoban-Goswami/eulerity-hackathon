@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { colors, typography, spacing, borderRadius, transitions, glass, gradients, zIndex, elevation } from '../theme';
+import { colors, typography, spacing, borderRadius, glass, gradients, zIndex, elevation } from '../theme';
+import { formatFileSize } from '../utils/fileSize';
+import { Button } from './Button';
 
 interface SelectionControlsProps {
   selectedCount: number;
@@ -139,145 +141,6 @@ const Actions = styled.div`
   }
 `;
 
-const DownloadButton = styled.button`
-  background: ${gradients.primary};
-  color: ${colors.onPrimary};
-  font-weight: 800;
-  padding: 10px 20px;
-  border-radius: ${borderRadius.xl};
-  display: flex;
-  align-items: center;
-  gap: ${spacing.xs};
-  border: none;
-  cursor: pointer;
-  transition: ${transitions.default};
-  font-size: ${typography.label.small.fontSize};
-  font-family: ${typography.label.medium.fontFamily};
-  box-shadow: ${elevation.level1};
-  white-space: nowrap;
-  flex-shrink: 0;
-
-  @media (min-width: 768px) {
-    padding: 12px 32px;
-    gap: ${spacing.sm};
-    font-size: ${typography.label.medium.fontSize};
-  }
-
-  @media (max-width: 479px) {
-    padding: 6px 10px;
-    gap: 2px;
-    
-    & span:first-child {
-      font-size: 16px;
-    }
-    
-    & span:last-child {
-      display: none;
-    }
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${elevation.level2};
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const ClearButton = styled.button`
-  background: none;
-  color: ${colors.onPrimaryContainer};
-  font-size: ${typography.label.small.fontSize};
-  font-weight: ${typography.label.medium.fontWeight};
-  font-family: ${typography.label.medium.fontFamily};
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  white-space: nowrap;
-  
-  @media (min-width: 768px) {
-    font-size: ${typography.label.medium.fontSize};
-  }
-  
-  @media (max-width: 479px) {
-    display: none;
-  }
-  
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const SelectAllButton = styled.button`
-  background: none;
-  color: ${colors.onPrimaryContainer};
-  font-size: ${typography.label.small.fontSize};
-  font-weight: ${typography.label.medium.fontWeight};
-  font-family: ${typography.label.medium.fontFamily};
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  margin-right: ${spacing.sm};
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: ${spacing.xs};
-  
-  @media (min-width: 768px) {
-    font-size: ${typography.label.medium.fontSize};
-    margin-right: ${spacing.md};
-  }
-  
-  @media (max-width: 479px) {
-    padding: 6px;
-    margin-right: 2px;
-    
-    & span:first-child {
-      font-size: 16px;
-    }
-    
-    & span:last-child {
-      display: none;
-    }
-  }
-  
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const CloseButton = styled.button`
-  display: flex;
-  margin-left: ${spacing.sm};
-  padding: 4px;
-  border-radius: ${borderRadius.full};
-  background: none;
-  border: none;
-  color: ${colors.inverseOnSurface};
-  cursor: pointer;
-  transition: ${transitions.default};
-  
-  @media (max-width: 479px) {
-    margin-left: 2px;
-    padding: 6px;
-    
-    & span {
-      font-size: 16px;
-    }
-  }
-  
-  &:hover {
-    background: ${colors.surfaceVariant}20;
-  }
-`;
-
 export const SelectionControls: React.FC<SelectionControlsProps> = ({
   selectedCount,
   totalFileSize,
@@ -288,14 +151,6 @@ export const SelectionControls: React.FC<SelectionControlsProps> = ({
   totalItems,
 }) => {
   const isVisible = selectedCount > 0;
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${(bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
-  };
 
   if (!isVisible) return null;
 
@@ -312,28 +167,27 @@ export const SelectionControls: React.FC<SelectionControlsProps> = ({
 
         <Actions>
           {onSelectAll && totalItems && selectedCount < totalItems && (
-            <SelectAllButton onClick={onSelectAll}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>select_all</span>
-              <span>All</span>
-            </SelectAllButton>
+            <Button variant="ghost" size="sm" icon={<span className="material-symbols-outlined" style={{ fontSize: '18px' }}>select_all</span>} onClick={onSelectAll}>
+              All
+            </Button>
           )}
 
-          <DownloadButton
+          <Button
+            variant="download"
+            size="md"
+            icon={<span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>}
             onClick={onDownload}
             disabled={isDownloading}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
-            <span>Download</span>
-          </DownloadButton>
+            Download
+          </Button>
 
-          <ClearButton onClick={onClearSelection}>
+          <Button variant="ghost" size="sm" onClick={onClearSelection}>
             Clear
-          </ClearButton>
+          </Button>
         </Actions>
 
-        <CloseButton onClick={onClearSelection} aria-label="Close selection">
-          <span className="material-symbols-outlined">close</span>
-        </CloseButton>
+        <Button variant="ghost" size="sm" icon={<span className="material-symbols-outlined">close</span>} onClick={onClearSelection} aria-label="Close selection" style={{ padding: '4px', marginLeft: spacing.sm }} />
       </Pill>
     </Container>
   );

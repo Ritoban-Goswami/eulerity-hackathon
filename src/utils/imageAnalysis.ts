@@ -27,10 +27,16 @@ export const analyzeImageColors = async (
       quantizedColors,
     });
 
+    // Convert RGBColor[] to hex strings for quantizedColors
+    const rgbToHex = (rgb: { r: number; g: number; b: number }): string => {
+      const toHex = (c: number) => Math.round(c).toString(16).padStart(2, "0");
+      return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
+    };
+
     return {
-      dominantColor,
+      dominantColor: dominantColor,
       palette: colorPalette || [],
-      quantizedColors: quantizedColors || [],
+      quantizedColors: (quantizedColors || []).map(rgbToHex),
     };
   } catch (error) {
     console.error("Failed to analyze image colors:", error);

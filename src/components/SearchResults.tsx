@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { colors, typography, spacing, borderRadius, elevation } from '../theme';
+import { Button } from './Button';
 
 interface SearchResultsProps {
   query: string;
@@ -152,52 +153,6 @@ const ActionDivider = styled.div`
   }
 `;
 
-const ActionButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  border-radius: ${borderRadius.md};
-  border: none;
-  background: none;
-  color: ${props => props.variant === 'primary' ? colors.primary : colors.secondary};
-  font-size: 12px;
-  font-weight: 500;
-  font-family: ${typography.label.medium.fontFamily};
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  
-  @media (max-width: 479px) {
-    padding: 4px 8px;
-    gap: 2px;
-    font-size: 11px;
-    
-    & span:first-child {
-      font-size: 14px;
-    }
-    
-    & span:last-child {
-      display: none;
-    }
-  }
-  
-  @media (min-width: 768px) {
-    gap: ${spacing.xs};
-    padding: 6px 12px;
-    font-size: ${typography.label.medium.fontSize};
-    font-weight: ${typography.label.medium.fontWeight};
-  }
-  
-  &:hover {
-    background: ${colors.surfaceVariant};
-  }
-  
-  &:active {
-    transform: scale(0.95);
-  }
-`;
-
 const RecentSearchesSection = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -308,14 +263,12 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           <BulkActionBar>
             <ActionsLabel>Actions</ActionsLabel>
             <ActionDivider />
-            <ActionButton variant="primary" onClick={onExport}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>download</span>
-              <span>Export</span>
-            </ActionButton>
-            <ActionButton variant="secondary" onClick={onShare}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>share</span>
-              <span>Share</span>
-            </ActionButton>
+            <Button variant="primary" size="sm" icon={<span className="material-symbols-outlined" style={{ fontSize: '16px' }}>download</span>} onClick={onExport}>
+              Export
+            </Button>
+            <Button variant="secondary" size="sm" icon={<span className="material-symbols-outlined" style={{ fontSize: '16px' }}>share</span>} onClick={onShare}>
+              Share
+            </Button>
           </BulkActionBar>
         </ResultsTopSection>
 

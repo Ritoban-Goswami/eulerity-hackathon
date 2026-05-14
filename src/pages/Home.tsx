@@ -7,16 +7,11 @@ import { SelectionControls } from '../components/SelectionControls';
 import { Navigation } from '../components/Layout/Navigation';
 import { CustomDropdown } from '../components/CustomDropdown';
 import { SearchResults } from '../components/SearchResults';
+import { useDownload } from '../hooks/useDownload';
 import { sortPets, filterPets } from '../utils/filterAndSort';
-import { downloadSelectedImages } from '../utils/download';
+import { shareContent } from '../utils/share';
 import { colors, typography, spacing } from '../theme';
 import type { SortOption } from '../types/pet';
-
-// Remove the old Container, Header, and other styled components as they're now handled by Navigation
-
-
-
-
 
 const PageHeader = styled.div`
   display: flex;
@@ -127,8 +122,8 @@ const LoadingSpinner = styled.svg`
 const Home: React.FC = () => {
   const location = useLocation();
   const { pets, loading, error, colorAnalysisLoading, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, clearSelection, selectAll } = useSelection();
+  const { isDownloading, handleDownload } = useDownload();
   const [sortOption, setSortOption] = useState<SortOption>('name-asc');
-  const [isDownloading, setIsDownloading] = useState(false);
   const [displayedCount, setDisplayedCount] = useState(12);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -226,48 +221,23 @@ const Home: React.FC = () => {
   };
 
   const handleShare = async () => {
-    const shareUrl = window.location.href;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'PawShots Search Results',
-          text: `Check out these ${sortedPets.length} pets`,
-          url: shareUrl
-        });
-      } catch {
-        // Error sharing - fallback to clipboard copy
-      }
-    } else {
-      // Fallback - copy to clipboard
-      navigator.clipboard.writeText(shareUrl);
-      alert('Link copied to clipboard!');
-    }
+    await shareContent({
+      title: 'PawShots Search Results',
+      text: `Check out these ${sortedPets.length} pets`
+    });
   };
 
   const handleExport = () => {
     if (selectedCount > 0) {
-      handleDownload();
+      handleDownload(selectedPets);
     } else {
       // Export all filtered results if nothing is selected
-      setIsDownloading(true);
-      downloadSelectedImages(sortedPets).catch(error => {
-        console.error('Export failed:', error);
-      }).finally(() => {
-        setIsDownloading(false);
-      });
+      handleDownload(sortedPets);
     }
   };
 
-  const handleDownload = async () => {
-    if (selectedCount === 0) return;
-    setIsDownloading(true);
-    try {
-      await downloadSelectedImages(selectedPets);
-    } catch (error) {
-      console.error('Download failed:', error);
-    } finally {
-      setIsDownloading(false);
-    }
+  const handleDownloadSelected = () => {
+    handleDownload(selectedPets);
   };
 
   // Intersection Observer for infinite scroll
@@ -333,9 +303,9 @@ const Home: React.FC = () => {
         <>
           <PageHeader>
             <TitleSection>
-              <Title>Premium Gallery</Title>
+              <Title>Pet Gallery</Title>
               <Subtitle>
-                Explore your curated collection of high-resolution pet memories, organized by beauty and breed.
+                Discover beautiful pet portraits in stunning high resolution.
               </Subtitle>
             </TitleSection>
             <SortContainer>
@@ -382,7 +352,7 @@ const Home: React.FC = () => {
         selectedCount={selectedCount}
         totalFileSize={totalFileSize}
         onClearSelection={clearSelection}
-        onDownload={handleDownload}
+        onDownload={handleDownloadSelected}
         isDownloading={isDownloading}
         onSelectAll={handleSelectAll}
         totalItems={sortedPets.length}
