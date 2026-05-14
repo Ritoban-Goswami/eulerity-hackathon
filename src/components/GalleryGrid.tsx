@@ -13,6 +13,8 @@ interface GalleryGridProps {
   loading?: boolean;
   error?: string | null;
   onRetry?: () => void;
+  allPets?: Pet[];
+  colorAnalysisLoading?: boolean;
 }
 
 /**
@@ -95,7 +97,9 @@ export const GalleryGrid: React.FC<GalleryGridProps> = React.memo(({
   link = true,
   loading = false,
   error = null,
-  onRetry
+  onRetry,
+  allPets,
+  colorAnalysisLoading = false
 }) => {
   if (loading) {
     return (
@@ -137,6 +141,7 @@ export const GalleryGrid: React.FC<GalleryGridProps> = React.memo(({
           isSelected={selectedIds.has(pet.id)}
           onToggleSelection={onToggleSelection}
           link={link}
+          colorAnalysisLoading={colorAnalysisLoading}
         />
       ))}
     </Grid>

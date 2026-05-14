@@ -445,6 +445,12 @@ export const Navigation: React.FC<NavigationProps> = ({ children, showSearch = f
             </span>
             Favorites
           </SidebarLink>
+          <SidebarLink to="/collections" active={location.pathname === '/collections'}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/collections' ? "'FILL' 1" : 'FILL 0' }}>
+              palette
+            </span>
+            Collections
+          </SidebarLink>
         </SidebarSection>
 
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
@@ -473,6 +479,12 @@ export const Navigation: React.FC<NavigationProps> = ({ children, showSearch = f
             favorite
           </span>
           <MobileNavLabel active={location.pathname === '/favorites'}>Favorites</MobileNavLabel>
+        </MobileNavItem>
+        <MobileNavItem to="/collections" active={location.pathname === '/collections'}>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/collections' ? "'FILL' 1" : 'FILL 0', fontSize: '24px' }}>
+            palette
+          </span>
+          <MobileNavLabel active={location.pathname === '/collections'}>Collections</MobileNavLabel>
         </MobileNavItem>
         <MobileNavItem to="/about" active={location.pathname === '/about'}>
           <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/about' ? "'FILL' 1" : 'FILL 0', fontSize: '24px' }}>

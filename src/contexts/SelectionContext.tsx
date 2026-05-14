@@ -8,6 +8,7 @@ interface SelectionContextType {
   loading: boolean;
   error: string | null;
   isEmpty: boolean;
+  colorAnalysisLoading: boolean;
   refetch: () => void;
   selectedIds: Set<string>;
   selectedPets: Pet[];
@@ -76,7 +77,7 @@ interface SelectionProviderProps {
 }
 
 export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }) => {
-  const { pets, loading, error, isEmpty, refetch } = usePetData();
+  const { pets, loading, error, isEmpty, colorAnalysisLoading, refetch } = usePetData();
 
   const initializeState = (): SelectionState => {
     try {
@@ -183,6 +184,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
     loading,
     error,
     isEmpty,
+    colorAnalysisLoading,
     refetch,
     selectedIds: state.selectedIds,
     selectedPets,
@@ -199,6 +201,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
     loading,
     error,
     isEmpty,
+    colorAnalysisLoading,
     refetch,
     state.selectedIds,
     state.totalFileSize,

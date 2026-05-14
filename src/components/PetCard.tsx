@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { colors, typography, spacing, borderRadius, elevation, transitions, aspectRatios } from '../theme';
 import type { Pet } from '../types/pet';
-import { QuickViewModal } from './QuickViewModal';
 import { FavoriteButton } from './FavoriteButton';
 import { useFavorites } from '../contexts/FavoritesContext';
+import { getColorCategory } from '../utils/imageAnalysis';
 
 interface PetCardProps {
   pet: Pet;
   isSelected: boolean;
   onToggleSelection: (pet: Pet) => void;
   link?: boolean;
+  colorAnalysisLoading?: boolean;
 }
 
 const Card = styled.article<{ $isSelected?: boolean }>`
@@ -134,11 +135,12 @@ const Overlay = styled.div`
   display: flex;
   align-items: flex-end;
   padding: ${spacing.sm};
-  
+  pointer-events: none;
+
   @media (min-width: 768px) {
     padding: ${spacing.md};
   }
-  
+
   ${Card}:hover & {
     opacity: 1;
   }
@@ -152,33 +154,74 @@ const Overlay = styled.div`
   }
 `;
 
-const QuickViewButton = styled.button`
-  color: ${colors.onPrimary};
+const ColorIndicator = styled.div<{ $color: string; $loading?: boolean }>`
+  position: absolute;
+  bottom: ${spacing.sm};
+  right: ${spacing.sm};
+  width: 24px;
+  height: 24px;
+  border-radius: ${borderRadius.full};
+  background: ${props => props.$color}70;
+  border: 2px solid ${props => props.$color}80;
+  box-shadow: ${elevation.level1};
+  z-index: 5;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: ${spacing.xs};
-  font-size: 12px;
-  font-weight: 500;
-  font-family: ${typography.label.medium.fontFamily};
-  background: none;
-  border: none;
-  cursor: pointer;
-
-  @media (max-width: 767px) {
-    display: none;
-  }
-  padding: 0;
+  justify-content: center;
   transition: ${transitions.default};
-  
-  @media (min-width: 768px) {
-    font-size: ${typography.label.medium.fontSize};
-    font-weight: ${typography.label.medium.fontWeight};
-  }
+  pointer-events: auto;
+
+  ${props => props.$loading && `
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: ${borderRadius.full};
+      border: 2px solid transparent;
+      border-top-color: ${colors.primary};
+      animation: spin 1s linear infinite;
+    }
+  `}
 
   &:hover {
-    color: ${colors.onPrimary}90;
+    transform: scale(1.1);
+    box-shadow: ${elevation.level2};
+  }
+
+  @media (min-width: 768px) {
+    width: 28px;
+    height: 28px;
+    bottom: ${spacing.md};
+    right: ${spacing.md};
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
+
+const ColorIcon = styled.span`
+  color: ${colors.surfaceContainerLowest};
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  @media (min-width: 768px) {
+    font-size: 16px;
+  }
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  gap: ${spacing.md};
+  align-items: center;
+`;
+
 
 const Content = styled.div`
   padding: ${spacing.sm};
@@ -297,8 +340,8 @@ const formatFileSize = (petId: string) => {
   return sizes[Math.abs(hash) % sizes.length];
 };
 
-export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, onToggleSelection, link = false }) => {
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, onToggleSelection, link = false, colorAnalysisLoading = false }) => {
+  const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -310,16 +353,21 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
     }
   };
 
-  const handleQuickView = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setIsQuickViewOpen(true);
-  };
-
   const handleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     toggleFavorite(pet.id);
+  };
+
+  const handleFindSimilar = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (pet.colorSignature) {
+      const category = getColorCategory(pet.colorSignature.dominantColor);
+      navigate(`/collections/${category.toLowerCase()}-tones`);
+    } else {
+      navigate(`/collections/neutral-tones`);
+    }
   };
 
   const breed = extractBreed(pet.title);
@@ -352,11 +400,17 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
           aria-label={`Select ${pet.title}`}
           aria-checked={isSelected}
         />
+        <ColorIndicator
+          $color={pet.colorSignature?.dominantColor || '#808080'}
+          $loading={colorAnalysisLoading && !pet.colorSignature}
+          onClick={handleFindSimilar}
+          title={pet.colorSignature ? "Find Similar" : "Analyzing colors..."}
+        >
+          <ColorIcon className="material-symbols-outlined">auto_awesome</ColorIcon>
+        </ColorIndicator>
         <Overlay>
-          <QuickViewButton onClick={handleQuickView}>
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>visibility</span>
-            <span>Quick View</span>
-          </QuickViewButton>
+          <ActionButtons>
+          </ActionButtons>
         </Overlay>
       </ImageContainer>
       <Content className="card-content">
@@ -381,31 +435,17 @@ export const PetCard: React.FC<PetCardProps> = React.memo(({ pet, isSelected, on
 
   if (link) {
     return (
-      <>
-        <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-          <Card onClick={handleCardClick} $isSelected={isSelected}>
-            {cardContent}
-          </Card>
-        </Link>
-        <QuickViewModal
-          pet={pet}
-          isOpen={isQuickViewOpen}
-          onClose={() => setIsQuickViewOpen(false)}
-        />
-      </>
+      <Link to={`/pet/${pet.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+        <Card onClick={handleCardClick} $isSelected={isSelected}>
+          {cardContent}
+        </Card>
+      </Link>
     );
   }
 
   return (
-    <>
-      <Card onClick={handleCardClick} $isSelected={isSelected}>
-        {cardContent}
-      </Card>
-      <QuickViewModal
-        pet={pet}
-        isOpen={isQuickViewOpen}
-        onClose={() => setIsQuickViewOpen(false)}
-      />
-    </>
+    <Card onClick={handleCardClick} $isSelected={isSelected}>
+      {cardContent}
+    </Card>
   );
 });
