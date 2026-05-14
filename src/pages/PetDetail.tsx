@@ -10,6 +10,7 @@ import { useSelection } from '../contexts/SelectionContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { downloadImage } from '../utils/download';
 import { getColorCategory } from '../utils/imageAnalysis';
+import type { Pet } from '../types/pet';
 
 // Styled Components
 const PetDetailContainer = styled.div`
@@ -414,7 +415,7 @@ const RelatedGrid = styled.div`
 `;
 
 // Sample extended pet data - in real app, this would come from API
-const getExtendedPetData = (pet: any) => {
+const getExtendedPetData = (pet: Pet) => {
   // Generate some sample metadata based on the pet
   const metadata = {
     dateAdded: new Date(pet.created).toLocaleDateString('en-US', {
@@ -457,6 +458,7 @@ const PetDetail: React.FC = () => {
     if (!pet || pets.length <= 1) return [];
 
     const others = pets.filter(p => p.id !== pet.id);
+    // eslint-disable-next-line react-hooks/purity
     const shuffled = [...others].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 4);
   }, [pet, pets]);
@@ -484,7 +486,7 @@ const PetDetail: React.FC = () => {
           text: pet?.description,
           url: window.location.href
         });
-      } catch (err) {
+      } catch {
         // Error sharing - fallback to clipboard copy
       }
     } else {

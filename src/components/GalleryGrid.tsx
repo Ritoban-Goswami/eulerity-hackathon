@@ -98,7 +98,6 @@ export const GalleryGrid: React.FC<GalleryGridProps> = React.memo(({
   loading = false,
   error = null,
   onRetry,
-  allPets,
   colorAnalysisLoading = false
 }) => {
   if (loading) {

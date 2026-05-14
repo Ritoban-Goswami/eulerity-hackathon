@@ -270,37 +270,6 @@ const SidebarLink = styled(Link).withConfig({
   }
 `;
 
-const UploadButton = styled.button`
-  background: ${gradients.secondary};
-  color: ${colors.onSecondary};
-  width: 100%;
-  padding: 16px;
-  border-radius: ${borderRadius.xl};
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${spacing.sm};
-  box-shadow: ${elevation.level1};
-  border: none;
-  cursor: pointer;
-  transition: ${transitions.default};
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${elevation.level2};
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-`;
-
-const SidebarDivider = styled.div`
-  height: 1px;
-  background: ${colors.outlineVariant}30;
-  margin: ${spacing.md} 0;
-`;
 
 // Main Content
 const Main = styled.main`

@@ -190,6 +190,7 @@ const Home: React.FC = () => {
     if (debouncedSearchQuery.trim()) {
       addToRecentSearches(debouncedSearchQuery);
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
   }, [debouncedSearchQuery]);
 
   // Clear search when navigating to home
@@ -197,6 +198,7 @@ const Home: React.FC = () => {
     if (location.pathname === '/') {
       setSearchQuery('');
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
   }, [location.pathname]);
 
 
@@ -232,7 +234,7 @@ const Home: React.FC = () => {
           text: `Check out these ${sortedPets.length} pets`,
           url: shareUrl
         });
-      } catch (err) {
+      } catch {
         // Error sharing - fallback to clipboard copy
       }
     } else {

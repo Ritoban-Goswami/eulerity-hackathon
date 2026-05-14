@@ -122,6 +122,7 @@ export const usePetData = (): UsePetDataReturn => {
 
   useEffect(() => {
     fetchPets();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
   }, []);
 
   const isEmpty = !loading && !error && pets.length === 0;

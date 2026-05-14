@@ -135,6 +135,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
     };
 
     fetchSizes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.selectedIds, pets]);
 
   // Recalculate total file size when selection or file sizes change
@@ -149,6 +150,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
     if (totalFileSize !== state.totalFileSize) {
       dispatch({ type: 'UPDATE_FILE_SIZE', payload: totalFileSize });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.selectedIds, fileSizeMap, state.totalFileSize]);
 
   const selectedPets = useMemo(() => {
@@ -221,6 +223,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSelection = (): SelectionContextType => {
   const context = useContext(SelectionContext);
   if (context === undefined) {
