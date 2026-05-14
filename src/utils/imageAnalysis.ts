@@ -4,6 +4,7 @@ import {
   getColorPalette,
   getQuantizedColors,
 } from "quantize-colors";
+import { getItem, setItem } from "./localStorage";
 
 /**
  * Analyzes an image URL to extract color signature using quantize-colors package
@@ -155,13 +156,9 @@ export const cacheColorSignature = (
   petId: string,
   signature: ColorSignature,
 ): void => {
-  try {
-    const cache = JSON.parse(localStorage.getItem("colorSignatures") || "{}");
-    cache[petId] = signature;
-    localStorage.setItem("colorSignatures", JSON.stringify(cache));
-  } catch (error) {
-    console.error("Failed to cache color signature:", error);
-  }
+  const cache = getItem<Record<string, ColorSignature>>("colorSignatures", {});
+  cache[petId] = signature;
+  setItem("colorSignatures", cache);
 };
 
 /**
@@ -170,13 +167,8 @@ export const cacheColorSignature = (
 export const getCachedColorSignature = (
   petId: string,
 ): ColorSignature | null => {
-  try {
-    const cache = JSON.parse(localStorage.getItem("colorSignatures") || "{}");
-    return cache[petId] || null;
-  } catch (error) {
-    console.error("Failed to retrieve cached color signature:", error);
-    return null;
-  }
+  const cache = getItem<Record<string, ColorSignature>>("colorSignatures", {});
+  return cache[petId] || null;
 };
 
 /**

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect, useState, useM
 import type { ReactNode } from 'react';
 import type { Pet, SelectionState } from '../types/pet';
 import { usePetData } from '../hooks/usePetData';
+import { getItem, createDebouncedSetter } from '../utils/localStorage';
 
 interface SelectionContextType {
   pets: Pet[];
@@ -80,20 +81,9 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
   const { pets, loading, error, isEmpty, colorAnalysisLoading, refetch } = usePetData();
 
   const initializeState = (): SelectionState => {
-    try {
-      const savedSelection = localStorage.getItem('selectedPetIds');
-      if (savedSelection) {
-        const parsedIds: string[] = JSON.parse(savedSelection);
-        return {
-          selectedIds: new Set(parsedIds),
-          totalFileSize: 0,
-        };
-      }
-    } catch (error) {
-      console.error('Failed to load selection from localStorage:', error);
-    }
+    const savedIds = getItem<string[]>('selectedPetIds', []);
     return {
-      selectedIds: new Set<string>(),
+      selectedIds: new Set(savedIds),
       totalFileSize: 0,
     };
   };
@@ -101,13 +91,10 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
   const [state, dispatch] = useReducer(selectionReducer, undefined, initializeState);
 
   // Debounced localStorage save to avoid frequent writes
+  const debouncedSave = createDebouncedSetter('selectedPetIds', 500);
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      localStorage.setItem('selectedPetIds', JSON.stringify(Array.from(state.selectedIds)));
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [state.selectedIds]);
+    debouncedSave(Array.from(state.selectedIds));
+  }, [state.selectedIds, debouncedSave]);
 
   // Maintain a separate map for file sizes to avoid mutating pet objects
   const [fileSizeMap, setFileSizeMap] = useState<Map<string, number>>(new Map());
