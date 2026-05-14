@@ -120,7 +120,7 @@ const EmptyMessage = styled.p`
 `;
 
 export const Favorites: React.FC = () => {
-  const { pets, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, clearSelection, selectAll } = useSelection();
+  const { pets, colorAnalysisLoading, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, clearSelection, selectAll } = useSelection();
   const { favoriteIds } = useFavorites();
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -175,6 +175,8 @@ export const Favorites: React.FC = () => {
             loading={false}
             error={null}
             onRetry={() => { }}
+            allPets={pets}
+            colorAnalysisLoading={colorAnalysisLoading}
           />
         )}
       </FavoritesContainer>

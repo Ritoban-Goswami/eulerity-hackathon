@@ -8,6 +8,7 @@ interface SelectionContextType {
   loading: boolean;
   error: string | null;
   isEmpty: boolean;
+  colorAnalysisLoading: boolean;
   refetch: () => void;
   selectedIds: Set<string>;
   selectedPets: Pet[];
@@ -76,7 +77,7 @@ interface SelectionProviderProps {
 }
 
 export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }) => {
-  const { pets, loading, error, isEmpty, refetch } = usePetData();
+  const { pets, loading, error, isEmpty, colorAnalysisLoading, refetch } = usePetData();
 
   const initializeState = (): SelectionState => {
     try {
@@ -134,6 +135,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
     };
 
     fetchSizes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.selectedIds, pets]);
 
   // Recalculate total file size when selection or file sizes change
@@ -148,6 +150,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
     if (totalFileSize !== state.totalFileSize) {
       dispatch({ type: 'UPDATE_FILE_SIZE', payload: totalFileSize });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.selectedIds, fileSizeMap, state.totalFileSize]);
 
   const selectedPets = useMemo(() => {
@@ -183,6 +186,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
     loading,
     error,
     isEmpty,
+    colorAnalysisLoading,
     refetch,
     selectedIds: state.selectedIds,
     selectedPets,
@@ -199,6 +203,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
     loading,
     error,
     isEmpty,
+    colorAnalysisLoading,
     refetch,
     state.selectedIds,
     state.totalFileSize,
@@ -218,6 +223,7 @@ export const SelectionProvider: React.FC<SelectionProviderProps> = ({ children }
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSelection = (): SelectionContextType => {
   const context = useContext(SelectionContext);
   if (context === undefined) {

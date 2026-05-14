@@ -1,3 +1,9 @@
+export interface ColorSignature {
+  dominantColor: string;
+  palette: string[];
+  quantizedColors: string[];
+}
+
 export interface Pet {
   id: string;
   url: string;
@@ -5,6 +11,7 @@ export interface Pet {
   title: string;
   description: string;
   created: string;
+  colorSignature?: ColorSignature;
 }
 
 export type SortOption =

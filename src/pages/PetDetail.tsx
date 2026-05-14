@@ -9,6 +9,8 @@ import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { useSelection } from '../contexts/SelectionContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { downloadImage } from '../utils/download';
+import { getColorCategory } from '../utils/imageAnalysis';
+import type { Pet } from '../types/pet';
 
 // Styled Components
 const PetDetailContainer = styled.div`
@@ -320,6 +322,72 @@ const ViewAllLink = styled.a`
   }
 `;
 
+const SimilarColorsButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.sm};
+  padding: ${spacing.md};
+  background: ${colors.surfaceContainerLow};
+  border: 1px solid ${colors.outlineVariant};
+  border-radius: ${borderRadius.lg};
+  cursor: pointer;
+  transition: ${transitions.default};
+  width: 100%;
+  margin-top: ${spacing.md};
+
+  &:hover {
+    background: ${colors.surfaceContainerHover};
+    border-color: ${colors.outline};
+    transform: translateY(-1px);
+    box-shadow: ${elevation.level1};
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const SimilarColorsIcon = styled.div<{ $color?: string }>`
+  width: 40px;
+  height: 40px;
+  border-radius: ${borderRadius.md};
+  background: ${props => props.$color ? `linear-gradient(135deg, ${props.$color}80, ${props.$color}40)` : colors.surfaceContainerHigh};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+`;
+
+const SimilarColorsContent = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+`;
+
+const SimilarColorsTitle = styled.h3`
+  font-size: 14px;
+  font-weight: 600;
+  font-family: ${typography.body.medium.fontFamily};
+  color: ${colors.onSurface};
+  margin: 0 0 2px 0;
+`;
+
+const SimilarColorsSubtitle = styled.p`
+  font-size: 12px;
+  font-weight: 400;
+  font-family: ${typography.body.small.fontFamily};
+  color: ${colors.onSurfaceVariant};
+  margin: 0;
+`;
+
+const SimilarColorsArrow = styled.span`
+  color: ${colors.onSurfaceVariant};
+  font-size: 20px;
+  display: flex
+`;
+
 const RelatedGrid = styled.div`
   display: grid;
   gap: ${spacing.sm};
@@ -347,7 +415,7 @@ const RelatedGrid = styled.div`
 `;
 
 // Sample extended pet data - in real app, this would come from API
-const getExtendedPetData = (pet: any) => {
+const getExtendedPetData = (pet: Pet) => {
   // Generate some sample metadata based on the pet
   const metadata = {
     dateAdded: new Date(pet.created).toLocaleDateString('en-US', {
@@ -390,6 +458,7 @@ const PetDetail: React.FC = () => {
     if (!pet || pets.length <= 1) return [];
 
     const others = pets.filter(p => p.id !== pet.id);
+    // eslint-disable-next-line react-hooks/purity
     const shuffled = [...others].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 4);
   }, [pet, pets]);
@@ -417,13 +486,22 @@ const PetDetail: React.FC = () => {
           text: pet?.description,
           url: window.location.href
         });
-      } catch (err) {
+      } catch {
         // Error sharing - fallback to clipboard copy
       }
     } else {
       // Fallback - copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
+    }
+  };
+
+  const handleViewSimilarColors = () => {
+    if (pet?.colorSignature) {
+      const category = getColorCategory(pet.colorSignature.dominantColor);
+      navigate(`/collections/${category.toLowerCase()}-tones`);
+    } else {
+      navigate(`/collections/neutral-tones`);
     }
   };
 
@@ -515,6 +593,23 @@ const PetDetail: React.FC = () => {
             <StoryText>{pet.story}</StoryText>
           </StorySection>
 
+          <SimilarColorsButton onClick={handleViewSimilarColors}>
+            <SimilarColorsIcon $color={pet.colorSignature?.dominantColor}>
+              <span className="material-symbols-outlined" style={{ fontSize: '24px', color: colors.onSurface }}>
+                auto_awesome
+              </span>
+            </SimilarColorsIcon>
+            <SimilarColorsContent>
+              <SimilarColorsTitle>Discover Similar Pets</SimilarColorsTitle>
+              <SimilarColorsSubtitle>
+                If you love {pet.title}, you'll adore these pets too
+              </SimilarColorsSubtitle>
+            </SimilarColorsContent>
+            <SimilarColorsArrow>
+              <span className="material-symbols-outlined">arrow_forward</span>
+            </SimilarColorsArrow>
+          </SimilarColorsButton>
+
           <ActionButtons>
             <ActionButton variant="primary" onClick={handleDownload}>
               <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
@@ -567,8 +662,8 @@ const PetDetail: React.FC = () => {
         <CollectionSection>
           <CollectionHeader>
             <CollectionTitleSection>
-              <CollectionTitle>More from this Collection</CollectionTitle>
-              <CollectionSubtitle>Explore the full Golden Hour series.</CollectionSubtitle>
+              <CollectionTitle>Check out these beautiful souls too</CollectionTitle>
+              <CollectionSubtitle>More adorable pets waiting to meet you</CollectionSubtitle>
             </CollectionTitleSection>
             <ViewAllLink href="#" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
               View All

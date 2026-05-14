@@ -270,37 +270,6 @@ const SidebarLink = styled(Link).withConfig({
   }
 `;
 
-const UploadButton = styled.button`
-  background: ${gradients.secondary};
-  color: ${colors.onSecondary};
-  width: 100%;
-  padding: 16px;
-  border-radius: ${borderRadius.xl};
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${spacing.sm};
-  box-shadow: ${elevation.level1};
-  border: none;
-  cursor: pointer;
-  transition: ${transitions.default};
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${elevation.level2};
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-`;
-
-const SidebarDivider = styled.div`
-  height: 1px;
-  background: ${colors.outlineVariant}30;
-  margin: ${spacing.md} 0;
-`;
 
 // Main Content
 const Main = styled.main`
@@ -445,6 +414,12 @@ export const Navigation: React.FC<NavigationProps> = ({ children, showSearch = f
             </span>
             Favorites
           </SidebarLink>
+          <SidebarLink to="/collections" active={location.pathname === '/collections'}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/collections' ? "'FILL' 1" : 'FILL 0' }}>
+              palette
+            </span>
+            Collections
+          </SidebarLink>
         </SidebarSection>
 
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
@@ -473,6 +448,12 @@ export const Navigation: React.FC<NavigationProps> = ({ children, showSearch = f
             favorite
           </span>
           <MobileNavLabel active={location.pathname === '/favorites'}>Favorites</MobileNavLabel>
+        </MobileNavItem>
+        <MobileNavItem to="/collections" active={location.pathname === '/collections'}>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/collections' ? "'FILL' 1" : 'FILL 0', fontSize: '24px' }}>
+            palette
+          </span>
+          <MobileNavLabel active={location.pathname === '/collections'}>Collections</MobileNavLabel>
         </MobileNavItem>
         <MobileNavItem to="/about" active={location.pathname === '/about'}>
           <span className="material-symbols-outlined" style={{ fontVariationSettings: location.pathname === '/about' ? "'FILL' 1" : 'FILL 0', fontSize: '24px' }}>
