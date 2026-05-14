@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import styled, { keyframes } from 'styled-components';
-import { colors, typography, spacing, borderRadius, gradients } from '../theme';
+import React from 'react';
+import styled from 'styled-components';
+import { colors, typography, spacing, gradients } from '../theme';
 import { Navigation } from '../components/Layout/Navigation';
 import { GalleryGrid } from '../components/GalleryGrid';
 import { SelectionControls } from '../components/SelectionControls';
+import { EmptyState } from '../components/EmptyState';
 import { useSelection } from '../contexts/SelectionContext';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { downloadSelectedImages } from '../utils/download';
+import { useDownload } from '../hooks/useDownload';
 
 const FavoritesContainer = styled.div`
   padding: ${spacing.sm};
@@ -57,85 +58,15 @@ const FavoritesSubtitle = styled.p`
   }
 `;
 
-const EmptyFavorites = styled.div`
-  text-align: center;
-  padding: ${spacing.lg} ${spacing.md};
-  background: ${colors.surfaceContainer};
-  border-radius: ${borderRadius.xl};
-  border: 1px solid ${colors.outlineVariant}20;
-  
-  @media (min-width: 768px) {
-    padding: ${spacing.xl} ${spacing.lg};
-  }
-`;
-
-const float = keyframes`
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-`;
-
-const EmptyIcon = styled.div`
-  font-size: 40px;
-  margin-bottom: ${spacing.sm};
-  color: ${colors.primary};
-  animation: ${float} 3s ease-in-out infinite;
-  
-  @media (min-width: 768px) {
-    font-size: 64px;
-    margin-bottom: ${spacing.lg};
-  }
-`;
-
-const EmptyTitle = styled.h2`
-  font-size: 18px;
-  font-weight: 600;
-  font-family: ${typography.headline.large.fontFamily};
-  color: ${colors.onSurface};
-  margin: 0 0 ${spacing.sm} 0;
-  
-  @media (min-width: 768px) {
-    font-size: ${typography.headline.large.fontSize};
-    font-weight: ${typography.headline.large.fontWeight};
-  }
-`;
-
-const EmptyMessage = styled.p`
-  font-size: 13px;
-  font-weight: 400;
-  font-family: ${typography.body.medium.fontFamily};
-  color: ${colors.onSurfaceVariant};
-  margin: 0;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-  
-  @media (min-width: 768px) {
-    font-size: ${typography.body.large.fontSize};
-    font-weight: ${typography.body.large.fontWeight};
-  }
-`;
-
 export const Favorites: React.FC = () => {
   const { pets, colorAnalysisLoading, selectedIds, selectedPets, selectedCount, totalFileSize, toggleSelection, clearSelection, selectAll } = useSelection();
   const { favoriteIds } = useFavorites();
-  const [isDownloading, setIsDownloading] = useState(false);
+  const { isDownloading, handleDownload } = useDownload();
 
   const favoritePets = pets.filter(pet => favoriteIds.has(pet.id));
 
-  const handleDownload = async () => {
-    if (selectedCount === 0) return;
-    setIsDownloading(true);
-    try {
-      await downloadSelectedImages(selectedPets);
-    } catch (error) {
-      console.error('Download failed:', error);
-    } finally {
-      setIsDownloading(false);
-    }
+  const handleDownloadSelected = () => {
+    handleDownload(selectedPets);
   };
 
   const handleSelectAll = () => {
@@ -156,17 +87,17 @@ export const Favorites: React.FC = () => {
         </FavoritesHeader>
 
         {favoritePets.length === 0 ? (
-          <EmptyFavorites>
-            <EmptyIcon>
+          <EmptyState
+            icon={
               <span className="material-symbols-outlined" style={{ fontVariationSettings: 'FILL 1' }}>
                 favorite
               </span>
-            </EmptyIcon>
-            <EmptyTitle>Your collection is empty</EmptyTitle>
-            <EmptyMessage>
-              Tap the heart icon on any pet to save it here and build your personal collection
-            </EmptyMessage>
-          </EmptyFavorites>
+            }
+            title="Your collection is empty"
+            message="Tap the heart icon on any pet to save it here and build your personal collection"
+            hasBackground={true}
+            animateIcon={true}
+          />
         ) : (
           <GalleryGrid
             pets={favoritePets}
@@ -185,7 +116,7 @@ export const Favorites: React.FC = () => {
         selectedCount={selectedCount}
         totalFileSize={totalFileSize}
         onClearSelection={clearSelection}
-        onDownload={handleDownload}
+        onDownload={handleDownloadSelected}
         isDownloading={isDownloading}
         onSelectAll={handleSelectAll}
         totalItems={favoritePets.length}

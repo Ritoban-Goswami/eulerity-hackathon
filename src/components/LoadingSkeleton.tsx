@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
 import { colors, elevation, spacing, borderRadius, aspectRatios } from '../theme';
 
 const shimmer = keyframes`
@@ -11,9 +11,7 @@ const shimmer = keyframes`
   }
 `;
 
-const SkeletonBase = styled.div<{ width?: string; height?: string }>`
-  width: ${props => props.width || '100%'};
-  height: ${props => props.height || '20px'};
+const shimmerMixin = css`
   background: linear-gradient(
     90deg,
     ${colors.surfaceContainer} 25%,
@@ -22,6 +20,12 @@ const SkeletonBase = styled.div<{ width?: string; height?: string }>`
   );
   background-size: 1000px 100%;
   animation: ${shimmer} 2s infinite;
+`;
+
+const SkeletonBase = styled.div<{ width?: string; height?: string }>`
+  width: ${props => props.width || '100%'};
+  height: ${props => props.height || '20px'};
+  ${shimmerMixin}
   border-radius: ${props => props.height === '100%' ? borderRadius.lg : '4px'};
 `;
 
@@ -38,14 +42,7 @@ const CardSkeleton = styled.div`
 
 const ImageSkeleton = styled.div`
   aspect-ratio: ${aspectRatios.petCard};
-  background: linear-gradient(
-    90deg,
-    ${colors.surfaceContainer} 25%,
-    ${colors.surfaceContainerHigh} 50%,
-    ${colors.surfaceContainer} 75%
-  );
-  background-size: 1000px 100%;
-  animation: ${shimmer} 2s infinite;
+  ${shimmerMixin}
 `;
 
 const ContentSkeleton = styled.div`
@@ -67,14 +64,7 @@ const CheckboxSkeleton = styled.div`
   width: 28px;
   height: 28px;
   border-radius: ${borderRadius.full};
-  background: linear-gradient(
-    90deg,
-    ${colors.surfaceContainer} 25%,
-    ${colors.surfaceContainerHigh} 50%,
-    ${colors.surfaceContainer} 75%
-  );
-  background-size: 1000px 100%;
-  animation: ${shimmer} 2s infinite;
+  ${shimmerMixin}
   
   @media (max-width: 479px) {
     width: 24px;
@@ -89,14 +79,7 @@ const FavoriteSkeleton = styled.div`
   width: 32px;
   height: 32px;
   border-radius: ${borderRadius.full};
-  background: linear-gradient(
-    90deg,
-    ${colors.surfaceContainer} 25%,
-    ${colors.surfaceContainerHigh} 50%,
-    ${colors.surfaceContainer} 75%
-  );
-  background-size: 1000px 100%;
-  animation: ${shimmer} 2s infinite;
+  ${shimmerMixin}
   
   @media (max-width: 479px) {
     width: 28px;
@@ -123,14 +106,7 @@ const PetDetailSkeleton = styled.div`
 const PetDetailImageSkeleton = styled.div`
   width: 100%;
   aspect-ratio: 4/3;
-  background: linear-gradient(
-    90deg,
-    ${colors.surfaceContainer} 25%,
-    ${colors.surfaceContainerHigh} 50%,
-    ${colors.surfaceContainer} 75%
-  );
-  background-size: 1000px 100%;
-  animation: ${shimmer} 2s infinite;
+  ${shimmerMixin}
   border-radius: ${borderRadius.lg};
   
   @media (max-width: 479px) {
@@ -150,14 +126,7 @@ const PetDetailInfoSkeleton = styled.div`
 
 const PetDetailTitleSkeleton = styled.div`
   height: 40px;
-  background: linear-gradient(
-    90deg,
-    ${colors.surfaceContainer} 25%,
-    ${colors.surfaceContainerHigh} 50%,
-    ${colors.surfaceContainer} 75%
-  );
-  background-size: 1000px 100%;
-  animation: ${shimmer} 2s infinite;
+  ${shimmerMixin}
   border-radius: 4px;
   width: 70%;
   
@@ -170,14 +139,7 @@ const PetDetailTitleSkeleton = styled.div`
 const PetDetailTagSkeleton = styled.div`
   height: 28px;
   width: 80px;
-  background: linear-gradient(
-    90deg,
-    ${colors.surfaceContainer} 25%,
-    ${colors.surfaceContainerHigh} 50%,
-    ${colors.surfaceContainer} 75%
-  );
-  background-size: 1000px 100%;
-  animation: ${shimmer} 2s infinite;
+  ${shimmerMixin}
   border-radius: ${borderRadius.full};
   
   @media (max-width: 479px) {
@@ -213,14 +175,7 @@ const PetDetailStorySkeleton = styled.div`
 
 const PetDetailActionSkeleton = styled.div`
   height: 44px;
-  background: linear-gradient(
-    90deg,
-    ${colors.surfaceContainer} 25%,
-    ${colors.surfaceContainerHigh} 50%,
-    ${colors.surfaceContainer} 75%
-  );
-  background-size: 1000px 100%;
-  animation: ${shimmer} 2s infinite;
+  ${shimmerMixin}
   border-radius: ${borderRadius.lg};
   width: 100%;
   

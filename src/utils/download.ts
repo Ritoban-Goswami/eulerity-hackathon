@@ -24,6 +24,14 @@ export const downloadImage = async (
   }
 };
 
+/**
+ * Downloads a single pet image with auto-generated filename
+ */
+export const downloadPetImage = async (pet: Pet): Promise<void> => {
+  const filename = `${pet.title.replace(/[^a-z0-9]/gi, "_")}.jpg`;
+  await downloadImage(pet.originalUrl || pet.url, filename);
+};
+
 export const downloadSelectedImages = async (pets: Pet[]): Promise<void> => {
   // If only one image, download directly without zip
   if (pets.length === 1) {

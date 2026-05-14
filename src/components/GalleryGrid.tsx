@@ -2,7 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { PetCard } from './PetCard';
 import { LoadingSkeleton } from './LoadingSkeleton';
-import { colors, typography, spacing } from '../theme';
+import { EmptyState } from './EmptyState';
+import { spacing } from '../theme';
 import type { Pet } from '../types/pet';
 
 interface GalleryGridProps {
@@ -49,47 +50,6 @@ const Grid = styled.div`
   }
 `;
 
-const EmptyState = styled.div`
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 60px 20px;
-  color: ${colors.onSurfaceVariant};
-`;
-
-const EmptyTitle = styled.h2`
-  font-size: ${typography.headline.medium.fontSize};
-  font-weight: ${typography.headline.medium.fontWeight};
-  font-family: ${typography.headline.medium.fontFamily};
-  margin-bottom: 12px;
-  color: ${colors.onSurface};
-`;
-
-const EmptyMessage = styled.p`
-  font-size: ${typography.body.medium.fontSize};
-  font-weight: ${typography.body.medium.fontWeight};
-  font-family: ${typography.body.medium.fontFamily};
-  max-width: 400px;
-  margin: 0 auto;
-  line-height: ${typography.body.medium.lineHeight};
-`;
-
-const RetryButton = styled.button`
-  margin-top: 24px;
-  padding: 12px 24px;
-  background: ${colors.primary};
-  color: ${colors.onPrimary};
-  border: none;
-  border-radius: 8px;
-  font-size: ${typography.body.medium.fontSize};
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: ${colors.primaryContainer};
-  }
-`;
-
 export const GalleryGrid: React.FC<GalleryGridProps> = React.memo(({
   pets,
   selectedIds,
@@ -110,24 +70,20 @@ export const GalleryGrid: React.FC<GalleryGridProps> = React.memo(({
 
   if (error) {
     return (
-      <EmptyState>
-        <EmptyTitle>Error Loading Pets</EmptyTitle>
-        <EmptyMessage>{error}</EmptyMessage>
-        {onRetry && (
-          <RetryButton onClick={onRetry}>Try Again</RetryButton>
-        )}
-      </EmptyState>
+      <EmptyState
+        title="Error Loading Pets"
+        message={error}
+        action={onRetry ? { label: 'Try Again', onClick: onRetry } : undefined}
+      />
     );
   }
 
   if (pets.length === 0) {
     return (
-      <EmptyState>
-        <EmptyTitle>No pets found</EmptyTitle>
-        <EmptyMessage>
-          Try adjusting your search or filters to find what you're looking for.
-        </EmptyMessage>
-      </EmptyState>
+      <EmptyState
+        title="No pets found"
+        message="Try adjusting your search or filters to find what you're looking for."
+      />
     );
   }
 
