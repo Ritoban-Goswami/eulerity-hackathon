@@ -1,11 +1,14 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { Link, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { colors, typography, spacing, borderRadius, elevation, transitions } from '../theme';
 import { Navigation } from '../components/Layout/Navigation';
 import { useSelection } from '../contexts/SelectionContext';
 import { groupPetsByColor } from '../utils/imageAnalysis';
 import { PetCard } from '../components/PetCard';
+import { EmptyState } from '../components/EmptyState';
+import { Button } from '../components/Button';
+import { usePetData } from '../hooks/usePetData';
 
 const CollectionsContainer = styled.div`
   max-width: 1400px;
@@ -254,129 +257,6 @@ const CollectionImage = styled.img`
   }
 `;
 
-const ViewAllButton = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: ${spacing.xs};
-  margin-top: ${spacing.md};
-  padding: ${spacing.sm} ${spacing.md};
-  background: ${colors.primary};
-  color: ${colors.onPrimary};
-  border-radius: ${borderRadius.lg};
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: ${typography.label.medium.fontFamily};
-  transition: ${transitions.default};
-  min-height: 44px;
-  
-  &:hover {
-    background: ${colors.primaryContainer};
-    color: ${colors.onPrimaryContainer};
-  }
-  
-  @media (min-width: 768px) {
-    font-size: ${typography.label.medium.fontSize};
-    font-weight: ${typography.label.medium.fontWeight};
-  }
-  
-  @media (max-width: 767px) {
-    font-size: 13px;
-    padding: ${spacing.xs} ${spacing.sm};
-    width: 100%;
-    justify-content: center;
-  }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: ${spacing.xl} ${spacing.md};
-  color: ${colors.onSurfaceVariant};
-  
-  @media (max-width: 767px) {
-    padding: ${spacing.lg} ${spacing.sm};
-  }
-`;
-
-const EmptyIcon = styled.div`
-  font-size: 48px;
-  margin-bottom: ${spacing.md};
-  opacity: 0.5;
-  
-  @media (max-width: 767px) {
-    font-size: 40px;
-    margin-bottom: ${spacing.sm};
-  }
-`;
-
-const EmptyTitle = styled.h3`
-  font-size: 18px;
-  font-weight: 600;
-  font-family: ${typography.headline.medium.fontFamily};
-  color: ${colors.onSurface};
-  margin: 0 0 ${spacing.sm} 0;
-  
-  @media (min-width: 768px) {
-    font-size: ${typography.headline.medium.fontSize};
-    font-weight: ${typography.headline.medium.fontWeight};
-  }
-  
-  @media (max-width: 767px) {
-    font-size: 16px;
-  }
-`;
-
-const EmptyMessage = styled.p`
-  font-size: 14px;
-  font-weight: 400;
-  font-family: ${typography.body.medium.fontFamily};
-  color: ${colors.onSurfaceVariant};
-  margin: 0;
-  max-width: 400px;
-  margin: 0 auto;
-
-  @media (min-width: 768px) {
-    font-size: ${typography.body.medium.fontSize};
-    font-weight: ${typography.body.medium.fontWeight};
-  }
-
-  @media (max-width: 767px) {
-    font-size: 13px;
-    padding: 0 ${spacing.xs};
-  }
-`;
-
-const BackButton = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: ${spacing.xs};
-  padding: ${spacing.sm} ${spacing.md};
-  background: ${colors.surfaceContainerHigh};
-  color: ${colors.onSurface};
-  border-radius: ${borderRadius.lg};
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: ${typography.label.medium.fontFamily};
-  transition: ${transitions.default};
-  margin-bottom: ${spacing.md};
-
-  &:hover {
-    background: ${colors.surfaceContainerHighest};
-  }
-
-  @media (min-width: 768px) {
-    font-size: ${typography.label.medium.fontSize};
-    font-weight: ${typography.label.medium.fontWeight};
-    margin-bottom: ${spacing.md};
-  }
-
-  @media (max-width: 767px) {
-    font-size: 13px;
-    padding: ${spacing.xs} ${spacing.sm};
-  }
-`;
-
 const SimilarGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
@@ -424,9 +304,10 @@ const COLLECTION_COLORS: Record<string, string> = {
 const COLLECTION_ORDER = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Pink', 'Warm', 'Cool', 'Bright', 'Dark', 'Neutral'];
 
 export const VisualCollections: React.FC = () => {
-  const { pets } = useSelection();
-  const { category } = useParams<{ category?: string }>();
+  const { category } = useParams();
+  const navigate = useNavigate();
   const { toggleSelection } = useSelection();
+  const { pets } = usePetData();
 
   const colorGroups = useMemo(() => {
     return groupPetsByColor(pets);
@@ -453,15 +334,11 @@ export const VisualCollections: React.FC = () => {
     return (
       <Navigation>
         <CollectionsContainer>
-          <EmptyState>
-            <EmptyIcon>
-              <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>palette</span>
-            </EmptyIcon>
-            <EmptyTitle>Loading Collections</EmptyTitle>
-            <EmptyMessage>
-              We're analyzing the colors in the pet images to create beautiful collections for you.
-            </EmptyMessage>
-          </EmptyState>
+          <EmptyState
+            icon={<span className="material-symbols-outlined" style={{ fontSize: '48px' }}>palette</span>}
+            title="Loading Collections"
+            message="We're analyzing the colors in the pet images to create beautiful collections for you."
+          />
         </CollectionsContainer>
       </Navigation>
     );
@@ -473,10 +350,15 @@ export const VisualCollections: React.FC = () => {
     return (
       <Navigation>
         <CollectionsContainer>
-          <BackButton to="/collections">
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
+          <Button
+            variant="surface"
+            size="md"
+            icon={<span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>}
+            onClick={() => navigate('/collections')}
+            style={{ marginBottom: '16px' }}
+          >
             Back to All Collections
-          </BackButton>
+          </Button>
 
           <Header>
             <Title>Pets with {selectedCategory} Tones</Title>
@@ -498,15 +380,11 @@ export const VisualCollections: React.FC = () => {
               ))}
             </SimilarGrid>
           ) : (
-            <EmptyState>
-              <EmptyIcon>
-                <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>palette</span>
-              </EmptyIcon>
-              <EmptyTitle>No Pets in This Collection</EmptyTitle>
-              <EmptyMessage>
-                There are no pets with {selectedCategory.toLowerCase()} tones yet.
-              </EmptyMessage>
-            </EmptyState>
+            <EmptyState
+              icon={<span className="material-symbols-outlined" style={{ fontSize: '48px' }}>palette</span>}
+              title="No Pets in This Collection"
+              message={`There are no pets with ${selectedCategory.toLowerCase()} tones yet.`}
+            />
           )}
         </CollectionsContainer>
       </Navigation>
@@ -545,24 +423,24 @@ export const VisualCollections: React.FC = () => {
                       />
                     ))}
                   </CollectionGrid>
-                  <ViewAllButton to={`/collections/${category.toLowerCase()}-tones`}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>visibility</span>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    icon={<span className="material-symbols-outlined" style={{ fontSize: '18px' }}>visibility</span>}
+                    onClick={() => navigate(`/collections/${category.toLowerCase()}-tones`)}
+                  >
                     Meet all {category} pets
-                  </ViewAllButton>
+                  </Button>
                 </CollectionContent>
               </CollectionCard>
             ))}
           </CollectionsGrid>
         ) : (
-          <EmptyState>
-            <EmptyIcon>
-              <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>palette</span>
-            </EmptyIcon>
-            <EmptyTitle>No Collections Yet</EmptyTitle>
-            <EmptyMessage>
-              We're still analyzing the colors in the pet images. Check back soon!
-            </EmptyMessage>
-          </EmptyState>
+          <EmptyState
+            icon={<span className="material-symbols-outlined" style={{ fontSize: '48px' }}>palette</span>}
+            title="No Collections Yet"
+            message="We're still analyzing the colors in the pet images. Check back soon!"
+          />
         )}
       </CollectionsContainer>
     </Navigation>

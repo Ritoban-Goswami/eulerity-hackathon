@@ -258,9 +258,10 @@ const About: React.FC = () => {
           <SectionTitle>The Project</SectionTitle>
           <Paragraph>
             PawShots is a modern web application built as a take-home challenge for Eulerity.
-            It showcases a responsive image gallery with advanced features including a dedicated search page,
-            sorting, bulk selection with persistent state, and download capabilities. The application demonstrates a sophisticated
-            companion brand identity with a premium, minimalist aesthetic.
+            It showcases a responsive pet image gallery with advanced features including real-time search,
+            AI-powered color analysis, visual collections, sorting, bulk selection with persistent state,
+            and download capabilities. The application demonstrates a sophisticated companion brand identity
+            with a premium, minimalist aesthetic.
           </Paragraph>
         </Section>
 
@@ -281,10 +282,20 @@ const About: React.FC = () => {
               <FeatureIcon>
                 <span className="material-symbols-outlined">search</span>
               </FeatureIcon>
-              <FeatureTitle>Dedicated Search Page</FeatureTitle>
+              <FeatureTitle>Inline Search</FeatureTitle>
               <Paragraph>
-                Separate search page with URL-based navigation, recent searches with localStorage persistence,
-                and filtering by both title and description.
+                Real-time search with debounced input, recent searches with localStorage persistence,
+                and filtering by both title and description directly on the home page.
+              </Paragraph>
+            </FeatureItem>
+            <FeatureItem>
+              <FeatureIcon>
+                <span className="material-symbols-outlined">palette</span>
+              </FeatureIcon>
+              <FeatureTitle>Visual Collections</FeatureTitle>
+              <Paragraph>
+                Discover pets grouped by color categories using AI-powered image analysis,
+                with dedicated collection pages for each color tone.
               </Paragraph>
             </FeatureItem>
             <FeatureItem>
@@ -327,6 +338,26 @@ const About: React.FC = () => {
                 and custom dropdown component.
               </Paragraph>
             </FeatureItem>
+            <FeatureItem>
+              <FeatureIcon>
+                <span className="material-symbols-outlined">share</span>
+              </FeatureIcon>
+              <FeatureTitle>Share Functionality</FeatureTitle>
+              <Paragraph>
+                Share search results with others using native Web Share API,
+                making it easy to spread the joy of discovering new pets.
+              </Paragraph>
+            </FeatureItem>
+            <FeatureItem>
+              <FeatureIcon>
+                <span className="material-symbols-outlined">auto_awesome</span>
+              </FeatureIcon>
+              <FeatureTitle>Infinite Scroll</FeatureTitle>
+              <Paragraph>
+                Load more pets automatically as you scroll with Intersection Observer,
+                providing a seamless browsing experience without pagination.
+              </Paragraph>
+            </FeatureItem>
           </FeatureGrid>
         </Section>
 
@@ -335,7 +366,7 @@ const About: React.FC = () => {
           <TechGrid>
             <TechItem>
               <TechIcon className="material-symbols-outlined">code</TechIcon>
-              <TechText>React 18 with TypeScript for type safety and better developer experience</TechText>
+              <TechText>React 19 with TypeScript for type safety and better developer experience</TechText>
             </TechItem>
             <TechItem>
               <TechIcon className="material-symbols-outlined">palette</TechIcon>
@@ -343,11 +374,11 @@ const About: React.FC = () => {
             </TechItem>
             <TechItem>
               <TechIcon className="material-symbols-outlined">route</TechIcon>
-              <TechText>React Router with dynamic routing, URL-based search, and dedicated search page</TechText>
+              <TechText>React Router with dynamic routing and URL-based navigation</TechText>
             </TechItem>
             <TechItem>
               <TechIcon className="material-symbols-outlined">integration_instructions</TechIcon>
-              <TechText>Custom hooks (usePetData, useSelection, useFavorites) for data and state management</TechText>
+              <TechText>Custom hooks (usePetData, useSelection, useFavorites, useDownload) for data and state management</TechText>
             </TechItem>
             <TechItem>
               <TechIcon className="material-symbols-outlined">storage</TechIcon>
@@ -358,12 +389,16 @@ const About: React.FC = () => {
               <TechText>Vite for lightning-fast development and optimized builds</TechText>
             </TechItem>
             <TechItem>
+              <TechIcon className="material-symbols-outlined">color_lens</TechIcon>
+              <TechText>quantize-colors library for AI-powered image color analysis and palette extraction</TechText>
+            </TechItem>
+            <TechItem>
               <TechIcon className="material-symbols-outlined">folder_zip</TechIcon>
               <TechText>JSZip library for creating ZIP files when downloading multiple images</TechText>
             </TechItem>
             <TechItem>
               <TechIcon className="material-symbols-outlined">history</TechIcon>
-              <TechText>LocalStorage for recent searches and selection persistence across sessions</TechText>
+              <TechText>LocalStorage for recent searches, favorites, and color signature caching</TechText>
             </TechItem>
           </TechGrid>
         </Section>

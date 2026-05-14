@@ -1,16 +1,17 @@
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import styled from 'styled-components';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useSelection } from '../contexts/SelectionContext';
-import { GalleryGrid } from '../components/GalleryGrid';
-import { SelectionControls } from '../components/SelectionControls';
-import { Navigation } from '../components/Layout/Navigation';
-import { CustomDropdown } from '../components/CustomDropdown';
-import { SearchResults } from '../components/SearchResults';
-import { useDownload } from '../hooks/useDownload';
-import { sortPets, filterPets } from '../utils/filterAndSort';
-import { shareContent } from '../utils/share';
+import styled from 'styled-components';
 import { colors, typography, spacing } from '../theme';
+import { Navigation } from '../components/Layout/Navigation';
+import { useSelection } from '../contexts/SelectionContext';
+import { useDownload } from '../hooks/useDownload';
+import { SelectionControls } from '../components/SelectionControls';
+import { SearchResults } from '../components/SearchResults';
+import { GalleryGrid } from '../components/GalleryGrid';
+import { CustomDropdown } from '../components/CustomDropdown';
+import { shareContent } from '../utils/share';
+import { getItem, setItem } from '../utils/localStorage';
+import { sortPets, filterPets } from '../utils/filterAndSort';
 import type { SortOption } from '../types/pet';
 
 const PageHeader = styled.div`
@@ -129,12 +130,7 @@ const Home: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState<Array<{ term: string; primary?: boolean }>>(() => {
-    try {
-      const saved = localStorage.getItem('recentSearches');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+    return getItem('recentSearches', []);
   });
   const PETS_PER_PAGE = 12;
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -164,7 +160,7 @@ const Home: React.FC = () => {
 
   // Save recent searches to localStorage
   useEffect(() => {
-    localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+    setItem('recentSearches', recentSearches);
   }, [recentSearches]);
 
   const addToRecentSearches = (query: string) => {

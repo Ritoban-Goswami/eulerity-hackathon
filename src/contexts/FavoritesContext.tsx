@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { getItem, setItem } from '../utils/localStorage';
 
 interface FavoritesState {
   favoriteIds: string[];
@@ -59,33 +60,17 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   // Load favorites from localStorage on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      console.log('Loading favorites from localStorage:', stored);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        console.log('Parsed favorites:', parsed);
-        if (Array.isArray(parsed)) {
-          dispatch({ type: 'SET_FAVORITES', payload: parsed });
-        }
-      }
-    } catch (error) {
-      console.error('Error loading favorites from localStorage:', error);
-    } finally {
-      setIsLoaded(true);
+    const stored = getItem<string[]>(STORAGE_KEY, []);
+    if (Array.isArray(stored)) {
+      dispatch({ type: 'SET_FAVORITES', payload: stored });
     }
+    setIsLoaded(true);
   }, []);
 
   // Save favorites to localStorage whenever they change (but only after initial load)
   useEffect(() => {
     if (!isLoaded) return;
-    try {
-      console.log('Saving favorites to localStorage:', state.favoriteIds);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.favoriteIds));
-      console.log('Saved successfully');
-    } catch (error) {
-      console.error('Error saving favorites to localStorage:', error);
-    }
+    setItem(STORAGE_KEY, state.favoriteIds);
   }, [state.favoriteIds, isLoaded]);
 
   const toggleFavorite = (id: string) => {

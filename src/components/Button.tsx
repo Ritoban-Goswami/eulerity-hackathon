@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { colors, typography, spacing, borderRadius, elevation, transitions, gradients } from '../theme';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'download';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'download' | 'surface';
   size?: 'sm' | 'md' | 'lg';
   icon?: React.ReactNode;
   children?: React.ReactNode;
@@ -99,6 +99,11 @@ const StyledButton = styled.button<{ $variant: ButtonProps['variant']; $size: Bu
           font-weight: 800;
           box-shadow: ${elevation.level1};
         `;
+      case 'surface':
+        return `
+          background: ${colors.surfaceContainerHigh};
+          color: ${colors.onSurface};
+        `;
       default:
         return `
           background: ${colors.surfaceContainerHigh};
@@ -125,6 +130,10 @@ const StyledButton = styled.button<{ $variant: ButtonProps['variant']; $size: Bu
       case 'ghost':
         return `
             background: ${colors.surfaceVariant};
+          `;
+      case 'surface':
+        return `
+            background: ${colors.surfaceContainerHighest};
           `;
       default:
         return `
