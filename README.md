@@ -6,6 +6,10 @@ A modern, responsive pet image gallery built as a take-home challenge for Euleri
 
 PawShots is a sophisticated web application that presents pet images in an interactive and visually compelling way. The application meets all core requirements while adding creative enhancements that demonstrate front-end development expertise.
 
+## Live Demo
+
+Check out the deployed application: [https://pawshots.netlify.app](https://pawshots.netlify.app)
+
 ## Implemented Requirements
 
 ### Core Features
