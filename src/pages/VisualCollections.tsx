@@ -224,6 +224,7 @@ const CollectionGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: ${spacing.sm};
+  margin-bottom: ${spacing.md};
   
   @media (min-width: 768px) {
     grid-template-columns: repeat(4, 1fr);
